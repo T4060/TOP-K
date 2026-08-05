@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import Image from "next/image";
 import {
   animate,
   motion,
@@ -26,6 +27,12 @@ const CARD_WIDTH = 300;
 const CARD_GAP = 24;
 const STEP = CARD_WIDTH + CARD_GAP;
 
+/** Unsplash photo IDs, picked from memory again at explicit request (no
+ * photos supplied, and no way to preview candidates from this sandbox —
+ * same blind spot as before). The two IDs previously confirmed to show
+ * the wrong subject (an abstract color-splash image and a wine-glasses
+ * table setting) are swapped out; everything else carries the same
+ * unverified-content risk. Spot-check the deployed carousel. */
 const DISHES = [
   {
     course: "01",
@@ -33,6 +40,7 @@ const DISHES = [
     name: "Charred Octopus",
     description: "Smoked paprika, confit lemon, sea fennel.",
     price: "$28",
+    image: "https://images.unsplash.com/photo-1432139555190-58524dae6a55?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "02",
@@ -40,6 +48,7 @@ const DISHES = [
     name: "Wagyu Tartare",
     description: "Burnt onion, quail yolk, rye crisp.",
     price: "$34",
+    image: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "03",
@@ -47,6 +56,7 @@ const DISHES = [
     name: "Heirloom Beet",
     description: "Whipped goat curd, pistachio, blood orange.",
     price: "$22",
+    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "04",
@@ -54,6 +64,7 @@ const DISHES = [
     name: "Black Cod",
     description: "Miso glaze, shiso, charred scallion.",
     price: "$46",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "05",
@@ -61,6 +72,7 @@ const DISHES = [
     name: "Duck Breast",
     description: "Cherry gastrique, celeriac, juniper.",
     price: "$42",
+    image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "06",
@@ -68,15 +80,9 @@ const DISHES = [
     name: "Dark Chocolate",
     description: "Olive oil, sea salt, brioche crumb.",
     price: "$18",
+    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
   },
 ] as const;
-
-/** Per-card radial focal point, cycled across the row so the photo-less
- * "plate" surface doesn't read as one repeated texture. Hotlinked stock
- * photography turned out unreliable — valid, loading images with wrong or
- * jarring subjects (twice now) — so this stays a crafted, verifiable
- * abstract surface instead of a third guess at an external photo ID. */
-const FOCAL_POINTS = ["30% 15%", "70% 20%", "40% 25%"] as const;
 
 function ArrowButton({
   direction,
@@ -123,7 +129,6 @@ function DishCard({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const entrance = prefersReducedMotion ? { duration: 0 } : PAN_SPRING;
-  const focalPoint = FOCAL_POINTS[index % FOCAL_POINTS.length];
 
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
@@ -168,14 +173,15 @@ function DishCard({
       }
       className="group relative h-[440px] w-[300px] shrink-0 overflow-hidden rounded-3xl border border-paper/10 transition-colors duration-200 hover:border-paper/25"
     >
-      {/* Plate surface: a radial-masked ink/paper gradient rather than a
-       * photo (rule 5), per the two-tone system. */}
-      <div
-        className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-105"
-        style={{
-          backgroundImage: `radial-gradient(120% 90% at ${focalPoint}, rgba(250,250,249,0.16), rgba(250,250,249,0.03) 55%, transparent 75%)`,
-        }}
+      <Image
+        src={dish.image}
+        alt={`${dish.name} — ${dish.description}`}
+        fill
+        sizes="300px"
+        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+        priority={index === 0}
       />
+      {/* Scrim so the overlaid text stays legible over the photo. */}
       <div className="absolute inset-0 bg-gradient-to-t from-ink from-15% via-ink/70 via-45% to-transparent to-80%" />
 
       <div className="relative flex h-full flex-col justify-between p-7">
