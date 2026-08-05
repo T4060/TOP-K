@@ -16,14 +16,21 @@ import { cn } from "@/lib/utils";
  * since a small tracked element reads better snappy, per the tuning note
  * in rule 1.
  */
+const SIZE_STYLES = {
+  default: "px-8 py-4 text-sm",
+  sm: "px-5 py-2.5 text-xs",
+} as const;
+
 export function MagneticButton({
   children,
   className,
   href = "#",
+  size = "default",
 }: {
   children: React.ReactNode;
   className?: string;
   href?: string;
+  size?: keyof typeof SIZE_STYLES;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -56,7 +63,8 @@ export function MagneticButton({
       style={prefersReducedMotion ? undefined : { x: springX, y: springY }}
       whileTap={{ scale: 0.96 }}
       className={cn(
-        "inline-flex items-center justify-center rounded-full bg-ink px-8 py-4 font-sans text-sm font-medium tracking-wide text-paper transition-colors duration-200 hover:bg-ink/90",
+        "inline-flex items-center justify-center rounded-full bg-ink font-sans font-medium tracking-wide text-paper transition-colors duration-200 hover:bg-ink/90",
+        SIZE_STYLES[size],
         className
       )}
     >
