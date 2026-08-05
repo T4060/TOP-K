@@ -8,18 +8,17 @@ import { Stagger, StaggerItem } from "@/components/stagger";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** High-velocity default, per explicit direction: replaces rule 1's
- * standard 100/15 panel tier with a crisper spring site-wide, including
- * this track's drag-release pan. */
+/** Fluid layout tier — CLAUDE.md rule 1's 220/20 named tier, for this
+ * track's drag-release pan and section entrance. */
 const PAN_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
-/** Small-element tier from rule 1's tuning note, reused for card hover
- * lift and arrow-button press feedback. */
-const HOVER_SPRING = { type: "spring", stiffness: 300, damping: 26 } as const;
-/** Snappier tier for the arrow buttons — small, directly tracked, and
- * meant to feel immediate per rule 1's tuning note. */
-const SNAP_SPRING = { type: "spring", stiffness: 420, damping: 26 } as const;
-/** Pointer-tilt spring for dish-card hover. */
-const TILT_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier, for
+ * card hover lift and arrow-button press feedback. */
+const HOVER_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
+/** Same 280/18 snap tier — arrow buttons are small and directly tracked,
+ * so they get the immediate-pop treatment too. */
+const SNAP_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
+/** Pointer-tilt spring for dish-card hover — 280/18 snap tier. */
+const TILT_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
 const TILT_DEGREES = 6;
 
 const CARD_WIDTH = 300;

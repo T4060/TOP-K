@@ -13,18 +13,17 @@ import { Stagger, StaggerItem } from "@/components/stagger";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** Pointer-tilt spring — snappy per rule 1's tuning note since it's
- * tracking the cursor directly. */
-const TILT_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
+/** Pointer-tilt spring — CLAUDE.md rule 1's 280/18 named tier, since
+ * it's tracking the cursor directly. */
+const TILT_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
 const TILT_DEGREES = 8;
 
-/** High-velocity default, per explicit direction: replaces rule 1's
- * standard 100/15 panel tier with a crisper spring for entrance and
- * shared-layout transitions on this section. */
+/** Fluid layout tier — CLAUDE.md rule 1's 220/20 named tier, for
+ * scroll-entrance and shared-layout transitions on this section. */
 const ENTRANCE_SPRING: Transition = { type: "spring", stiffness: 220, damping: 20 };
-/** Hover spring: stiffer per rule 1's tuning note for small, immediate
- * feedback (matches the magnetic button / navbar dropdown snappy tier). */
-const HOVER_SPRING: Transition = { type: "spring", stiffness: 300, damping: 26 };
+/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier, for
+ * direct hover/press feedback. */
+const HOVER_SPRING: Transition = { type: "spring", stiffness: 280, damping: 18 };
 /** Shared-layout spring driving the click-to-expand card morph. */
 const EXPAND_SPRING: Transition = { type: "spring", stiffness: 220, damping: 24 };
 

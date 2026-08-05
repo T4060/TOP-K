@@ -8,12 +8,14 @@ import { cn } from "@/lib/utils";
 
 const MotionLink = motion.create(Link);
 
+/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier. */
+const SNAP_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
+
 /**
  * Primary CTA per CLAUDE.md rule 2: pulls toward the cursor within a
  * bounded radius, springs back to rest on leave. Driven by `translate`
- * only (rule 3) via a spring (rule 1) — stiffer than the 100/15 default
- * since a small tracked element reads better snappy, per the tuning note
- * in rule 1.
+ * only (rule 3) via a spring (rule 1) — the 280/18 snap tier since a
+ * small tracked element reads better crisp.
  */
 const SIZE_STYLES = {
   default: "px-8 py-4 text-sm",
@@ -36,8 +38,8 @@ export function MagneticButton({
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 300, damping: 20 });
-  const springY = useSpring(y, { stiffness: 300, damping: 20 });
+  const springX = useSpring(x, SNAP_SPRING);
+  const springY = useSpring(y, SNAP_SPRING);
 
   function handleMouseMove(e: React.MouseEvent<HTMLElement>) {
     if (prefersReducedMotion || !ref.current) return;
@@ -62,7 +64,7 @@ export function MagneticButton({
       style={prefersReducedMotion ? undefined : { x: springX, y: springY }}
       whileHover={prefersReducedMotion ? undefined : { scale: 1.04 }}
       whileTap={{ scale: 0.96 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      transition={SNAP_SPRING}
       className={cn(
         "inline-flex items-center justify-center rounded-full bg-ink font-sans font-medium tracking-wide text-paper transition-colors duration-200 hover:bg-ink/90",
         SIZE_STYLES[size],

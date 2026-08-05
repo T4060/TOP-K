@@ -18,10 +18,10 @@ import {
   type ReservationInput,
 } from "@/lib/reservations";
 
-/** High-velocity default, per explicit direction: replaces rule 1's
- * standard 100/15 panel tier with a crisper spring site-wide. */
+/** Fluid layout tier — CLAUDE.md rule 1's 220/20 named tier. */
 const ENTRANCE_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
-const PRESS_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier. */
+const PRESS_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
 
 const EMPTY_FORM: ReservationInput = {
   name: "",

@@ -8,6 +8,7 @@ import {
   useScroll,
   useSpring,
   useTransform,
+  type MotionValue,
 } from "framer-motion";
 import { AmbientCanvas } from "@/components/ambient-canvas";
 import { MagneticButton } from "@/components/magnetic-button";
@@ -15,10 +16,36 @@ import { Stagger, StaggerItem } from "@/components/stagger";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** Cursor-tracked radial glow, scoped to this hero's own bento tiles only
- * (not a site-wide cursor effect — that was tried and explicitly removed
- * earlier). Spring-smoothed position rather than tracking the pointer
- * 1:1, so the glow drifts rather than snaps. */
+/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier. */
+const SNAP_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
+
+/**
+ * Full-bleed cursor-tracking light. Gold per CLAUDE.md rule 4's
+ * documented, hero-only exception to the two-tone system. The spring is
+ * deliberately soft with added mass so the light trails the pointer with
+ * visible inertia rather than snapping to it — that lag is the intended
+ * "kinetic" feel, not something to tune out (rule 1).
+ */
+function GoldCursorGlow({
+  x,
+  y,
+}: {
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+}) {
+  const glow = useMotionTemplate`radial-gradient(640px circle at ${x}px ${y}px, rgba(212,175,55,0.22), rgba(212,175,55,0.05) 42%, transparent 72%)`;
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-10"
+      style={{ background: glow }}
+    />
+  );
+}
+
+/** Glass-like bento panel floating over the section's full-bleed grid —
+ * no glow of its own now that the cursor light spans the whole hero. */
 function GlowTile({
   className,
   children,
@@ -26,44 +53,42 @@ function GlowTile({
   className?: string;
   children?: ReactNode;
 }) {
-  const prefersReducedMotion = useReducedMotion();
-  const mx = useMotionValue(50);
-  const my = useMotionValue(50);
-  const springX = useSpring(mx, { stiffness: 120, damping: 20, mass: 0.5 });
-  const springY = useSpring(my, { stiffness: 120, damping: 20, mass: 0.5 });
-  const glow = useMotionTemplate`radial-gradient(480px circle at ${springX}% ${springY}%, rgba(250,250,249,0.16), transparent 70%)`;
-
-  function handleMouseMove(e: MouseEvent<HTMLDivElement>) {
-    if (prefersReducedMotion) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    mx.set(((e.clientX - rect.left) / rect.width) * 100);
-    my.set(((e.clientY - rect.top) / rect.height) * 100);
-  }
-
   return (
     <div
-      onMouseMove={handleMouseMove}
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-paper/10 bg-paper/[0.03]",
+        "relative overflow-hidden rounded-3xl border border-paper/10 bg-paper/[0.04] backdrop-blur-sm",
         className
       )}
     >
-      <AmbientCanvas
-        className="absolute inset-0 [mask-image:radial-gradient(90%_80%_at_50%_30%,white,transparent)]"
-        color="#fafaf9"
-        maxOpacity={0.1}
-        squareSize={3}
-        gridGap={6}
-      />
-      {!prefersReducedMotion && (
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          style={{ background: glow }}
-        />
-      )}
       {children}
     </div>
+  );
+}
+
+/** The hero headline gets its own immediate, non-scroll-gated entrance —
+ * a spring-driven clip-path reveal so the line elegantly unmasks the
+ * millisecond the page loads, rather than waiting on the shared stagger
+ * used by the rest of the tile's copy. Bold sans per CLAUDE.md rule 4's
+ * documented hero-only exception to the serif-italic voice used
+ * everywhere else. */
+function HeroHeadline({
+  prefersReducedMotion,
+}: {
+  prefersReducedMotion: boolean;
+}) {
+  return (
+    <motion.h1
+      initial={
+        prefersReducedMotion
+          ? false
+          : { clipPath: "inset(0 100% 0 0)", y: 12 }
+      }
+      animate={{ clipPath: "inset(0 0% 0 0)", y: 0 }}
+      transition={prefersReducedMotion ? { duration: 0 } : SNAP_SPRING}
+      className="mt-6 font-sans text-6xl font-black leading-[0.9] tracking-tighter text-paper sm:text-7xl md:text-8xl"
+    >
+      Precision, at scale.
+    </motion.h1>
   );
 }
 
@@ -83,14 +108,39 @@ export function Hero() {
     damping: 20,
   });
 
+  const glowX = useMotionValue(0);
+  const glowY = useMotionValue(0);
+  const springGlowX = useSpring(glowX, { stiffness: 40, damping: 14, mass: 1.4 });
+  const springGlowY = useSpring(glowY, { stiffness: 40, damping: 14, mass: 1.4 });
+
+  function handleMouseMove(e: MouseEvent<HTMLElement>) {
+    if (prefersReducedMotion || !sectionRef.current) return;
+    const rect = sectionRef.current.getBoundingClientRect();
+    glowX.set(e.clientX - rect.left);
+    glowY.set(e.clientY - rect.top);
+  }
+
   return (
     <section
       ref={sectionRef}
+      onMouseMove={handleMouseMove}
       className="relative flex min-h-screen w-full items-center overflow-hidden bg-ink px-6 py-32 text-paper"
     >
+      {/* Full-bleed kinetic grid — the 3-second hook's ambient backdrop. */}
+      <AmbientCanvas
+        className="absolute inset-0"
+        color="#fafaf9"
+        maxOpacity={0.07}
+        flickerChance={0.12}
+        squareSize={3}
+        gridGap={6}
+      />
+
+      {!prefersReducedMotion && <GoldCursorGlow x={springGlowX} y={springGlowY} />}
+
       <motion.div
         style={prefersReducedMotion ? undefined : { opacity: contentOpacity }}
-        className="relative z-10 mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[440px]"
+        className="relative z-20 mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[440px]"
       >
         <GlowTile className="flex flex-col justify-center p-10 md:col-span-2 md:p-14">
           <Stagger className="relative">
@@ -100,11 +150,7 @@ export function Hero() {
               </p>
             </StaggerItem>
 
-            <StaggerItem>
-              <h1 className="mt-6 font-display text-6xl italic leading-[0.95] tracking-tighter text-paper sm:text-7xl md:text-8xl">
-                Precision, at scale.
-              </h1>
-            </StaggerItem>
+            <HeroHeadline prefersReducedMotion={prefersReducedMotion} />
 
             <StaggerItem>
               <p className="mt-6 max-w-xl font-sans text-lg leading-relaxed text-paper/70">

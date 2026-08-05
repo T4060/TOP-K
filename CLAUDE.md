@@ -17,6 +17,19 @@ just a style guide.
   (`stiffness: 300–500`, `damping: 25–30`); larger surfaces (modals,
   panels) should stay closer to the default so they feel weighted, not
   twitchy.
+- **Named tiers in use on this project**, so components stay consistent
+  instead of each inventing its own numbers:
+  - `{ stiffness: 220, damping: 20 }` — fluid layout entrances: section
+    scroll-reveals, shared-layout (`layoutId`) morphs, drag-release pans.
+  - `{ stiffness: 280, damping: 18 }` — snappy interaction pop: button and
+    card `whileHover`/`whileTap`, magnetic-follow tracking, any
+    hover-driven `layout` size growth. This is the "instantly snap or
+    pop" tier — reach for it on anything the user is directly pointing at
+    or pressing.
+  - Cursor-tracking ambient lights (see rule 2's magnetic-glow note) stay
+    on a *softer* spring than either tier above (lower stiffness, added
+    `mass`) so the light trails the cursor with visible inertia instead
+    of snapping — the inertia is the point, not a bug to tune out.
 - Only reach for duration-based `tween` easing when a spring genuinely
   doesn't fit (e.g. looping/indeterminate animations). Justify the
   exception in a comment when it happens.
@@ -30,9 +43,25 @@ just a style guide.
 - Dropdowns, popovers, and modals use shared layout morphing
   (`layoutId` in Framer Motion) so the trigger visually transforms into
   the opened surface instead of the surface just fading/popping in.
+  `layoutId` requires two rendered states of the *same logical element*
+  (a trigger and its opened surface, a card and its expanded detail
+  view) to morph between — it is not a substitute for a plain
+  scroll-triggered entrance. A section or grid of cards staggering into
+  view on scroll has no "before" element to morph from, so that stays a
+  transform/opacity spring per rule 3; give grid items a bare `layout`
+  prop (no `layoutId`) instead, so if the grid itself reflows (a card
+  expands, the viewport resizes) its siblings glide into their new slots
+  via FLIP rather than snapping.
 - Every interactive element (button, link, input, menu item) has an
   explicit hover and active/pressed state — no bare default browser
   affordances.
+- **Documented exception — hero cursor glow is metallic gold.** The hero
+  section's full-bleed cursor-tracking light is gold (`#d4af37`-family),
+  not paper-white. This is a deliberate, explicit exception to rule 4's
+  two-tone system, scoped *only* to that one hero glow effect — it does
+  not license gold anywhere else (buttons, text, borders, other
+  sections' ambient canvases all stay ink/paper). Requested and
+  confirmed directly by the user over the two-tone default.
 
 ## 3. Smoothness & performance
 
@@ -60,6 +89,13 @@ just a style guide.
 - Headlines set at a noticeably larger, tighter `line-height` /
   `letter-spacing` than body text to read as "editorial," not default
   browser heading sizes.
+- **Documented exception — the hero headline only is bold sans.** Every
+  other display headline on the site (feature grid, about, reservations)
+  stays the serif-italic Fraunces voice described above. The hero's `h1`
+  alone is set in Inter at `font-black` instead, per an explicit user
+  choice to match a punchier, high-impact reference over the serif
+  default. Treat this as scoped to that one element, not a precedent for
+  swapping the site's display face elsewhere.
 
 ## 5. Design fidelity & validation workflow
 
@@ -91,13 +127,18 @@ just a style guide.
 
 When pulling a component from the 21st MCP or writing one from scratch:
 1. Check the component's transitions — convert any `ease`/`duration`
-   animation on interactive state changes to a spring per rule 1.
+   animation on interactive state changes to a spring per rule 1, using
+   the 220/20 or 280/18 named tier as appropriate rather than a new
+   one-off number.
 2. Add magnetic hover to primary buttons and `layoutId` morphing to any
-   dropdown/modal/popover per rule 2.
+   dropdown/modal/popover per rule 2 — but not to plain scroll-reveal
+   entrances, which stay transform/opacity springs with a bare `layout`
+   for reflow smoothing.
 3. Confirm no animated property triggers layout; wrap scroll-driven
    effects in Lenis/Motion One per rule 3.
 4. Confirm typography follows the serif-display + sans-body pairing and
-   the tight layout geometry per rule 4.
+   the tight layout geometry per rule 4, except the hero headline's
+   documented bold-sans exception.
 5. Run the Playwright screenshot pass on every visual state (default,
    hover, open/active), self-critique alignment/spacing/contrast, and
    only then build + push, per rule 5.

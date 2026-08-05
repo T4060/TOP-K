@@ -5,9 +5,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** High-velocity default, per explicit direction: replaces rule 1's
- * standard 100/15 panel tier with a crisper spring site-wide. */
+/** Fluid layout tier — CLAUDE.md rule 1's 220/20 named tier, for the
+ * layoutId-driven highlight pill and dropdown morph. */
 const DEFAULT_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier, for
+ * the menu-item button's own hover/press feedback. */
+const HOVER_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
 
 export function Menu({
   setActive,
@@ -44,6 +47,7 @@ export function MenuItem({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const transition = prefersReducedMotion ? { duration: 0 } : DEFAULT_SPRING;
+  const hover = prefersReducedMotion ? { duration: 0 } : HOVER_SPRING;
 
   return (
     <div
@@ -62,7 +66,7 @@ export function MenuItem({
         type="button"
         whileHover={{ scale: prefersReducedMotion ? 1 : 1.06 }}
         whileTap={{ scale: prefersReducedMotion ? 1 : 0.94 }}
-        transition={transition}
+        transition={hover}
         className="relative font-sans text-sm text-ink/80 transition-colors duration-200 hover:text-ink"
       >
         {item}

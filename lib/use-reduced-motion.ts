@@ -13,7 +13,7 @@ import { useReducedMotion as useFramerReducedMotion } from "framer-motion";
  * reduced motion then happens on a normal post-commit re-render instead of
  * during hydration itself.
  */
-export function useReducedMotion() {
+export function useReducedMotion(): boolean {
   const actual = useFramerReducedMotion();
   const [mounted, setMounted] = useState(false);
 
@@ -21,5 +21,5 @@ export function useReducedMotion() {
     setMounted(true);
   }, []);
 
-  return mounted ? actual : false;
+  return mounted ? Boolean(actual) : false;
 }

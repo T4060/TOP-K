@@ -13,7 +13,7 @@ const serif = Fraunces({
 
 const sans = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "900"],
   variable: "--font-sans",
   display: "swap",
 });
