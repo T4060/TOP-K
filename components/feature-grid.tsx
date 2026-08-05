@@ -15,6 +15,12 @@ import { cn } from "@/lib/utils";
 const TILT_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
 const TILT_DEGREES = 8;
 
+/** Same crafted radial-gradient ambient texture as the tasting-menu
+ * cards — ink/paper only, nothing to verify — so the large featured
+ * card doesn't read as a dead void without resorting to photography,
+ * which was already tried and rejected here. */
+const FOCAL_POINTS = ["30% 20%", "70% 25%", "40% 30%", "60% 20%", "50% 25%"] as const;
+
 /** Entrance spring: default per CLAUDE.md rule 1 — these are card-sized
  * surfaces, so they stay on 100/15 rather than the stiffer hover tuning. */
 const ENTRANCE_SPRING: Transition = { type: "spring", stiffness: 100, damping: 15 };
@@ -75,6 +81,7 @@ function FeatureCard({
   const prefersReducedMotion = useReducedMotion();
   const entrance = prefersReducedMotion ? { duration: 0 } : ENTRANCE_SPRING;
   const hover = prefersReducedMotion ? { duration: 0 } : HOVER_SPRING;
+  const focalPoint = FOCAL_POINTS[index % FOCAL_POINTS.length];
 
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
@@ -123,10 +130,17 @@ function FeatureCard({
         feature.span
       )}
     >
-      <span className="font-sans text-xs tracking-[0.2em] text-paper/40">
+      <div
+        className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-105"
+        style={{
+          backgroundImage: `radial-gradient(120% 90% at ${focalPoint}, rgba(250,250,249,0.14), rgba(250,250,249,0.03) 55%, transparent 75%)`,
+        }}
+      />
+
+      <span className="relative font-sans text-xs tracking-[0.2em] text-paper/40">
         {feature.eyebrow}
       </span>
-      <div className="mt-auto">
+      <div className="relative mt-auto">
         <h3
           className={cn(
             "font-display italic text-paper",
