@@ -19,9 +19,9 @@ just a style guide.
   twitchy.
 - **Named tiers in use on this project**, so components stay consistent
   instead of each inventing its own numbers. Both are hardened to settle
-  in well under rule 6's 400ms ceiling — this project no longer keeps a
-  deliberately "slow"/inertial tier; every micro-interaction resolves
-  fast:
+  in well under rule 6's 400ms ceiling — every micro-interaction on this
+  project resolves fast, with exactly one documented exception (the
+  hero's gold cursor light, rule 2):
   - `{ stiffness: 340, damping: 30 }` — fluid layout: section
     scroll-reveals, shared-layout (`layoutId`) morphs, drag-release pans.
     Weightier than the snap tier below, but still settles in ~250-300ms.
@@ -55,13 +55,15 @@ just a style guide.
 - Every interactive element (button, link, input, menu item) has an
   explicit hover and active/pressed state — no bare default browser
   affordances.
-- **The hero's gold cursor-glow exception has been reverted.** Rule 6's
-  two-color restraint now takes priority: the hero no longer has a
-  cursor-tracking glow of any color. It kept the full-bleed kinetic grid
-  background (that's monochrome paper-on-ink already, no exception
-  needed) but the extra glow layer — which was both a third color and a
-  deliberately slow/inertial spring — is gone. Don't reintroduce a
-  colored ambient light without revisiting this note.
+- **Permanent exception — hero cursor glow is metallic gold.** The hero
+  section's full-bleed cursor-tracking light is gold (`#d4af37`-family),
+  not paper-white, and its spring is deliberately soft/slow (added
+  `mass`, low stiffness) rather than the hardened tiers above — the
+  inertial lag is the point. This is a locked-in premium exception to
+  both rule 6's two-color restraint and its 400ms ceiling, confirmed
+  twice by the user (once to add it, once to explicitly keep it over
+  reverting). It stays scoped to *only* this one hero glow — it does not
+  license gold, or a slow spring, anywhere else on the site.
 
 ## 3. Smoothness & performance
 
@@ -89,13 +91,14 @@ just a style guide.
 - Headlines set at a noticeably larger, tighter `line-height` /
   `letter-spacing` than body text to read as "editorial," not default
   browser heading sizes.
-- **Documented exception — the hero headline only is bold sans.** Every
+- **Permanent exception — the hero headline only is bold sans.** Every
   other display headline on the site (feature grid, about, reservations)
   stays the serif-italic Fraunces voice described above. The hero's `h1`
-  alone is set in Inter at `font-black` instead, per an explicit user
-  choice to match a punchier, high-impact reference over the serif
-  default. Treat this as scoped to that one element, not a precedent for
-  swapping the site's display face elsewhere.
+  alone is set in Inter at `font-black` instead, per an explicit,
+  confirmed user choice to keep it as a premium exception rather than
+  fold it into rule 6's one-typeface constraint. Treat this as scoped to
+  that one element, not a precedent for swapping the site's display face
+  elsewhere.
 
 ## 5. Design fidelity & validation workflow
 
@@ -126,7 +129,11 @@ just a style guide.
 ## 6. Viral TikTok visual constraints & formulas
 
 From the @webloved viral design system — strict, literal formulas rather
-than general adjectives:
+than general adjectives. These apply everywhere **except** the two
+permanent premium exceptions carved out in rules 2 and 4 (the hero's gold
+cursor glow and its bold-sans headline) — those were confirmed twice by
+the user specifically to sit outside this section's restraint, not
+overlooked.
 
 - **Constraints over adjectives**: strict design restraint. Max of two
   colors, one typeface at two weights, and every single micro-interaction
@@ -157,8 +164,9 @@ When pulling a component from the 21st MCP or writing one from scratch:
 3. Confirm no animated property triggers layout; wrap scroll-driven
    effects in Lenis/Motion One per rule 3.
 4. Confirm typography follows the serif-display + sans-body pairing and
-   the tight layout geometry per rule 4, except the hero headline's
-   documented bold-sans exception.
+   the tight layout geometry per rule 4, and confirm colors stay ink/
+   paper per rule 6, except the hero's two permanent exceptions (gold
+   cursor glow, bold-sans headline) — don't extend either elsewhere.
 5. Run the Playwright screenshot pass on every visual state (default,
    hover, open/active), self-critique alignment/spacing/contrast, and
    only then build + push, per rule 5.

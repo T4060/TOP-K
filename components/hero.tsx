@@ -1,7 +1,15 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { useRef, type MouseEvent, type ReactNode } from "react";
+import {
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useScroll,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
 import { AmbientCanvas } from "@/components/ambient-canvas";
 import { MagneticButton } from "@/components/magnetic-button";
 import { Stagger, StaggerItem } from "@/components/stagger";
@@ -11,10 +19,34 @@ import { cn } from "@/lib/utils";
 /** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier. */
 const SNAP_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 
-/** Glass-like bento panel floating over the section's full-bleed grid. No
- * cursor glow here anymore — rule 6 prioritizes the two-color restraint
- * over the gold glow that used to live in this hero (see CLAUDE.md rule
- * 2's note). */
+/**
+ * Full-bleed cursor-tracking light. Gold per CLAUDE.md rule 2's permanent
+ * premium exception to the two-color restraint — deliberately exempt from
+ * the 340/30 / 500/30 hardened tiers too: a soft, high-mass spring so the
+ * light trails the pointer with visible inertia rather than snapping.
+ * That lag is the intended luxury feel, not something to tune out.
+ */
+function GoldCursorGlow({
+  x,
+  y,
+}: {
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+}) {
+  const glow = useMotionTemplate`radial-gradient(640px circle at ${x}px ${y}px, rgba(212,175,55,0.22), rgba(212,175,55,0.05) 42%, transparent 72%)`;
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-10"
+      style={{ background: glow }}
+    />
+  );
+}
+
+/** Glass-like bento panel floating over the section's full-bleed grid —
+ * no glow of its own now that the gold cursor light spans the whole
+ * hero. */
 function GlowTile({
   className,
   children,
@@ -38,8 +70,9 @@ function GlowTile({
  * a spring-driven clip-path reveal so the line elegantly unmasks the
  * millisecond the page loads, rather than waiting on the shared stagger
  * used by the rest of the tile's copy. Bold sans per CLAUDE.md rule 4's
- * documented hero-only exception to the serif-italic voice used
- * everywhere else. */
+ * permanent premium exception to the serif-italic voice used everywhere
+ * else. The reveal itself still uses the hardened snap tier — the
+ * exception covers the typeface choice, not this animation's speed. */
 function HeroHeadline({
   prefersReducedMotion,
 }: {
@@ -77,13 +110,25 @@ export function Hero() {
     damping: 20,
   });
 
+  const glowX = useMotionValue(0);
+  const glowY = useMotionValue(0);
+  const springGlowX = useSpring(glowX, { stiffness: 40, damping: 14, mass: 1.4 });
+  const springGlowY = useSpring(glowY, { stiffness: 40, damping: 14, mass: 1.4 });
+
+  function handleMouseMove(e: MouseEvent<HTMLElement>) {
+    if (prefersReducedMotion || !sectionRef.current) return;
+    const rect = sectionRef.current.getBoundingClientRect();
+    glowX.set(e.clientX - rect.left);
+    glowY.set(e.clientY - rect.top);
+  }
+
   return (
     <section
       ref={sectionRef}
+      onMouseMove={handleMouseMove}
       className="relative flex min-h-screen w-full items-center overflow-hidden bg-ink px-6 py-32 text-paper"
     >
-      {/* Full-bleed kinetic grid — monochrome paper-on-ink, no exception
-       * needed. This is the 3-second hook's ambient backdrop. */}
+      {/* Full-bleed kinetic grid — the 3-second hook's ambient backdrop. */}
       <AmbientCanvas
         className="absolute inset-0"
         color="#fafaf9"
@@ -92,6 +137,8 @@ export function Hero() {
         squareSize={3}
         gridGap={6}
       />
+
+      {!prefersReducedMotion && <GoldCursorGlow x={springGlowX} y={springGlowY} />}
 
       <motion.div
         style={prefersReducedMotion ? undefined : { opacity: contentOpacity }}
