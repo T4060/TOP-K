@@ -123,6 +123,26 @@ just a style guide.
   mask with a radial gradient or `backdrop-filter` rather than a
   hard-edged rectangle where that reads as more premium.
 
+## 6. Viral TikTok visual constraints & formulas
+
+From the @webloved viral design system — strict, literal formulas rather
+than general adjectives:
+
+- **Constraints over adjectives**: strict design restraint. Max of two
+  colors, one typeface at two weights, and every single micro-interaction
+  execution time stays strictly under 400ms. Nothing moves unless the
+  user causes it.
+- **The gentle float**: drive hero imagery or food graphics with a
+  continuous sine wave, `y = amplitude * sin(time * speed)`, fed into the
+  animation loop every frame so elements breathe fluidly instead of
+  sitting dead on the canvas.
+- **Infinite technical mesh**: a zero-image dot matrix background made
+  from a single CSS `radial-gradient` tiled infinitely via
+  `background-size` — deep technical structure at zero image-load cost.
+- **Retina spatial tuning**: every custom canvas element maps explicitly
+  to `canvas.width = W * devicePixelRatio`, scaled via `ctx.scale(dpr,
+  dpr)`, to eliminate blur on high-density displays.
+
 ## Applying these rules
 
 When pulling a component from the 21st MCP or writing one from scratch:
