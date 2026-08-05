@@ -21,15 +21,15 @@ export function Navbar() {
         <Menu setActive={setActive}>
           <MenuItem setActive={setActive} active={active} item="Design system">
             <div className="flex flex-col gap-3">
-              <HoveredLink href="#typography">Typography</HoveredLink>
-              <HoveredLink href="#motion">Motion</HoveredLink>
-              <HoveredLink href="#color">Color</HoveredLink>
-              <HoveredLink href="#layout">Layout</HoveredLink>
+              <HoveredLink href="/#typography">Typography</HoveredLink>
+              <HoveredLink href="/#motion">Motion</HoveredLink>
+              <HoveredLink href="/#color">Color</HoveredLink>
+              <HoveredLink href="/#layout">Layout</HoveredLink>
             </div>
           </MenuItem>
           <MenuItem setActive={setActive} active={active} item="Work">
             <div className="flex flex-col gap-3">
-              <HoveredLink href="#menu">Tasting menu</HoveredLink>
+              <HoveredLink href="/#menu">Tasting menu</HoveredLink>
               <HoveredLink href="/about">About</HoveredLink>
             </div>
           </MenuItem>
