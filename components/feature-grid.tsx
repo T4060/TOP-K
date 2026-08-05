@@ -1,13 +1,15 @@
 "use client";
 
-import type { MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import {
+  AnimatePresence,
   motion,
   useMotionValue,
   useReducedMotion,
   useSpring,
   type Transition,
 } from "framer-motion";
+import { FlickeringGrid } from "@/components/ui/flickering-grid";
 import { cn } from "@/lib/utils";
 
 /** Pointer-tilt spring — snappy per rule 1's tuning note since it's
@@ -15,18 +17,15 @@ import { cn } from "@/lib/utils";
 const TILT_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
 const TILT_DEGREES = 8;
 
-/** Same crafted radial-gradient ambient texture as the tasting-menu
- * cards — ink/paper only, nothing to verify — so the large featured
- * card doesn't read as a dead void without resorting to photography,
- * which was already tried and rejected here. */
-const FOCAL_POINTS = ["30% 20%", "70% 25%", "40% 30%", "60% 20%", "50% 25%"] as const;
-
-/** Entrance spring: default per CLAUDE.md rule 1 — these are card-sized
- * surfaces, so they stay on 100/15 rather than the stiffer hover tuning. */
-const ENTRANCE_SPRING: Transition = { type: "spring", stiffness: 100, damping: 15 };
+/** High-velocity default, per explicit direction: replaces rule 1's
+ * standard 100/15 panel tier with a crisper spring for entrance and
+ * shared-layout transitions on this section. */
+const ENTRANCE_SPRING: Transition = { type: "spring", stiffness: 220, damping: 20 };
 /** Hover spring: stiffer per rule 1's tuning note for small, immediate
  * feedback (matches the magnetic button / navbar dropdown snappy tier). */
 const HOVER_SPRING: Transition = { type: "spring", stiffness: 300, damping: 26 };
+/** Shared-layout spring driving the click-to-expand card morph. */
+const EXPAND_SPRING: Transition = { type: "spring", stiffness: 220, damping: 24 };
 
 const FEATURES = [
   {
@@ -71,17 +70,36 @@ const FEATURES = [
   },
 ] as const;
 
+function CloseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path
+        d="M1 1l12 12M13 1L1 13"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function FeatureCard({
   feature,
   index,
+  isActive,
+  onOpen,
+  onClose,
 }: {
   feature: (typeof FEATURES)[number];
   index: number;
+  isActive: boolean;
+  onOpen: () => void;
+  onClose: () => void;
 }) {
   const prefersReducedMotion = useReducedMotion();
   const entrance = prefersReducedMotion ? { duration: 0 } : ENTRANCE_SPRING;
   const hover = prefersReducedMotion ? { duration: 0 } : HOVER_SPRING;
-  const focalPoint = FOCAL_POINTS[index % FOCAL_POINTS.length];
+  const expandTransition = prefersReducedMotion ? { duration: 0 } : EXPAND_SPRING;
 
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
@@ -89,7 +107,7 @@ function FeatureCard({
   const springRotateY = useSpring(rotateY, TILT_SPRING);
 
   function handleMouseMove(e: MouseEvent<HTMLDivElement>) {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || isActive) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const relX = (e.clientX - rect.left) / rect.width - 0.5;
     const relY = (e.clientY - rect.top) / rect.height - 0.5;
@@ -104,20 +122,27 @@ function FeatureCard({
 
   return (
     <motion.div
+      layoutId={`feature-card-${feature.title}`}
+      layout
       id={feature.title.toLowerCase()}
+      role={isActive ? "dialog" : undefined}
+      aria-modal={isActive || undefined}
+      aria-label={isActive ? feature.title : undefined}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={isActive ? undefined : onOpen}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
-      whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+      whileHover={prefersReducedMotion || isActive ? undefined : { scale: 1.02 }}
       transition={{
         opacity: { ...entrance, delay: index * 0.08 },
         y: { ...entrance, delay: index * 0.08 },
         scale: hover,
+        layout: expandTransition,
       }}
       style={
-        prefersReducedMotion
+        prefersReducedMotion || isActive
           ? undefined
           : {
               rotateX: springRotateX,
@@ -126,16 +151,39 @@ function FeatureCard({
             }
       }
       className={cn(
-        "group relative flex scroll-mt-24 flex-col justify-between overflow-hidden rounded-3xl border border-paper/10 bg-paper/[0.03] p-8 transition-colors duration-200 hover:border-paper/20 hover:bg-paper/[0.05]",
-        feature.span
+        "group relative flex scroll-mt-24 cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-paper/10 bg-paper/[0.03] p-8 transition-colors duration-200 hover:border-paper/20 hover:bg-paper/[0.05]",
+        isActive
+          ? "fixed inset-6 z-[70] cursor-default sm:inset-x-auto sm:inset-y-12 sm:left-1/2 sm:w-full sm:max-w-lg sm:-translate-x-1/2"
+          : feature.span
       )}
     >
-      <div
-        className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-105"
-        style={{
-          backgroundImage: `radial-gradient(120% 90% at ${focalPoint}, rgba(250,250,249,0.14), rgba(250,250,249,0.03) 55%, transparent 75%)`,
-        }}
+      {/* Dynamic canvas texture, not a static block — same technique as
+       * the hero's FlickeringGrid, kept dark/subtle here. */}
+      <FlickeringGrid
+        className="absolute inset-0 [mask-image:radial-gradient(120%_90%_at_30%_20%,white,transparent)]"
+        color="#fafaf9"
+        maxOpacity={0.08}
+        flickerChance={0.15}
+        squareSize={2}
+        gridGap={5}
       />
+      <div className="absolute inset-0 bg-ink/10" />
+
+      {isActive && (
+        <motion.button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          whileTap={{ scale: 0.9 }}
+          transition={HOVER_SPRING}
+          aria-label="Close"
+          className="absolute right-6 top-6 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-paper/20 text-paper transition-colors duration-200 hover:border-paper/40 hover:bg-paper/10"
+        >
+          <CloseIcon />
+        </motion.button>
+      )}
 
       <span className="relative font-sans text-xs tracking-[0.2em] text-paper/40">
         {feature.eyebrow}
@@ -143,13 +191,18 @@ function FeatureCard({
       <div className="relative mt-auto">
         <h3
           className={cn(
-            "font-display italic text-paper",
-            feature.featured ? "text-3xl" : "text-xl"
+            "font-display italic tracking-tight text-paper",
+            isActive ? "text-4xl" : feature.featured ? "text-3xl" : "text-xl"
           )}
         >
           {feature.title}
         </h3>
-        <p className="mt-3 max-w-xs font-sans text-sm leading-relaxed text-paper/60">
+        <p
+          className={cn(
+            "mt-3 font-sans leading-relaxed text-paper/60",
+            isActive ? "max-w-md text-base" : "max-w-xs text-sm"
+          )}
+        >
           {feature.description}
         </p>
       </div>
@@ -160,6 +213,16 @@ function FeatureCard({
 export function FeatureGrid() {
   const prefersReducedMotion = useReducedMotion();
   const entrance = prefersReducedMotion ? { duration: 0 } : ENTRANCE_SPRING;
+  const [activeTitle, setActiveTitle] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!activeTitle) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setActiveTitle(null);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeTitle]);
 
   return (
     <section className="relative bg-ink px-6 py-32 text-paper">
@@ -178,17 +241,38 @@ export function FeatureGrid() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ ...entrance, delay: prefersReducedMotion ? 0 : 0.08 }}
-          className="mt-4 max-w-xl font-display text-4xl italic leading-[1.1] tracking-tight sm:text-5xl"
+          className="mt-4 max-w-xl font-display text-5xl italic leading-[1.02] tracking-tighter text-paper sm:text-6xl"
         >
           Built on first principles.
         </motion.h2>
 
         <div className="mt-16 grid grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[180px]">
           {FEATURES.map((feature, index) => (
-            <FeatureCard key={feature.title} feature={feature} index={index} />
+            <FeatureCard
+              key={feature.title}
+              feature={feature}
+              index={index}
+              isActive={activeTitle === feature.title}
+              onOpen={() => setActiveTitle(feature.title)}
+              onClose={() => setActiveTitle(null)}
+            />
           ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {activeTitle && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
+            onClick={() => setActiveTitle(null)}
+            aria-hidden="true"
+            className="fixed inset-0 z-[60] bg-ink/80 backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
