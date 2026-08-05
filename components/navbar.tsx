@@ -29,20 +29,19 @@ export function Navbar() {
           </MenuItem>
           <MenuItem setActive={setActive} active={active} item="Work">
             <div className="flex flex-col gap-3">
-              <HoveredLink href="#case-studies">Case studies</HoveredLink>
-              <HoveredLink href="#playground">Playground</HoveredLink>
-              <HoveredLink href="#changelog">Changelog</HoveredLink>
+              <HoveredLink href="#menu">Tasting menu</HoveredLink>
+              <HoveredLink href="/about">About</HoveredLink>
             </div>
           </MenuItem>
           <Link
-            href="#pricing"
+            href="/reservations"
             className="font-sans text-sm text-ink/80 transition-colors duration-200 hover:text-ink"
           >
-            Pricing
+            Reservations
           </Link>
         </Menu>
 
-        <MagneticButton href="#get-started" size="sm">
+        <MagneticButton href="/reservations" size="sm">
           Get started
         </MagneticButton>
       </div>

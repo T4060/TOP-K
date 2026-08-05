@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import {
   motion,
   useMotionValue,
@@ -8,6 +9,8 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
+
+const MotionLink = motion.create(Link);
 
 /**
  * Primary CTA per CLAUDE.md rule 2: pulls toward the cursor within a
@@ -40,7 +43,7 @@ export function MagneticButton({
   const springX = useSpring(x, { stiffness: 300, damping: 20 });
   const springY = useSpring(y, { stiffness: 300, damping: 20 });
 
-  function handleMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
+  function handleMouseMove(e: React.MouseEvent<HTMLElement>) {
     if (prefersReducedMotion || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     const relX = e.clientX - rect.left - rect.width / 2;
@@ -55,7 +58,7 @@ export function MagneticButton({
   }
 
   return (
-    <motion.a
+    <MotionLink
       ref={ref}
       href={href}
       onMouseMove={handleMouseMove}
@@ -69,6 +72,6 @@ export function MagneticButton({
       )}
     >
       {children}
-    </motion.a>
+    </MotionLink>
   );
 }
