@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/smooth-scroll-provider";
-import { CursorGlow } from "@/components/cursor-glow";
 import "./globals.css";
 
 const serif = Fraunces({
@@ -32,7 +31,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable}`}>
       <body className="font-sans antialiased">
-        <CursorGlow />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
     </html>
