@@ -13,7 +13,7 @@ export function Navbar() {
       <div className="flex w-full max-w-5xl items-center justify-between gap-6">
         <Link
           href="/"
-          className="font-display text-xl italic text-ink"
+          className="rounded-full bg-paper/90 px-4 py-2 font-display text-xl italic text-ink backdrop-blur"
         >
           TOP-K
         </Link>

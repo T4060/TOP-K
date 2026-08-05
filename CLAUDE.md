@@ -17,6 +17,19 @@ just a style guide.
   (`stiffness: 300–500`, `damping: 25–30`); larger surfaces (modals,
   panels) should stay closer to the default so they feel weighted, not
   twitchy.
+- **Named tiers in use on this project**, so components stay consistent
+  instead of each inventing its own numbers. Both are hardened to settle
+  in well under rule 6's 400ms ceiling — every micro-interaction on this
+  project resolves fast, with exactly one documented exception (the
+  hero's gold cursor light, rule 2):
+  - `{ stiffness: 340, damping: 30 }` — fluid layout: section
+    scroll-reveals, shared-layout (`layoutId`) morphs, drag-release pans.
+    Weightier than the snap tier below, but still settles in ~250-300ms.
+  - `{ stiffness: 500, damping: 30 }` — snappy interaction pop: button and
+    card `whileHover`/`whileTap`, magnetic-follow tracking, any
+    hover-driven `layout` size growth, pointer-tilt tracking. This is the
+    "instantly snap or pop" tier — reach for it on anything the user is
+    directly pointing at or pressing.
 - Only reach for duration-based `tween` easing when a spring genuinely
   doesn't fit (e.g. looping/indeterminate animations). Justify the
   exception in a comment when it happens.
@@ -30,9 +43,27 @@ just a style guide.
 - Dropdowns, popovers, and modals use shared layout morphing
   (`layoutId` in Framer Motion) so the trigger visually transforms into
   the opened surface instead of the surface just fading/popping in.
+  `layoutId` requires two rendered states of the *same logical element*
+  (a trigger and its opened surface, a card and its expanded detail
+  view) to morph between — it is not a substitute for a plain
+  scroll-triggered entrance. A section or grid of cards staggering into
+  view on scroll has no "before" element to morph from, so that stays a
+  transform/opacity spring per rule 3; give grid items a bare `layout`
+  prop (no `layoutId`) instead, so if the grid itself reflows (a card
+  expands, the viewport resizes) its siblings glide into their new slots
+  via FLIP rather than snapping.
 - Every interactive element (button, link, input, menu item) has an
   explicit hover and active/pressed state — no bare default browser
   affordances.
+- **Permanent exception — hero cursor glow is metallic gold.** The hero
+  section's full-bleed cursor-tracking light is gold (`#d4af37`-family),
+  not paper-white, and its spring is deliberately soft/slow (added
+  `mass`, low stiffness) rather than the hardened tiers above — the
+  inertial lag is the point. This is a locked-in premium exception to
+  both rule 6's two-color restraint and its 400ms ceiling, confirmed
+  twice by the user (once to add it, once to explicitly keep it over
+  reverting). It stays scoped to *only* this one hero glow — it does not
+  license gold, or a slow spring, anywhere else on the site.
 
 ## 3. Smoothness & performance
 
@@ -60,6 +91,14 @@ just a style guide.
 - Headlines set at a noticeably larger, tighter `line-height` /
   `letter-spacing` than body text to read as "editorial," not default
   browser heading sizes.
+- **Permanent exception — the hero headline only is bold sans.** Every
+  other display headline on the site (feature grid, about, reservations)
+  stays the serif-italic Fraunces voice described above. The hero's `h1`
+  alone is set in Inter at `font-black` instead, per an explicit,
+  confirmed user choice to keep it as a premium exception rather than
+  fold it into rule 6's one-typeface constraint. Treat this as scoped to
+  that one element, not a precedent for swapping the site's display face
+  elsewhere.
 
 ## 5. Design fidelity & validation workflow
 
@@ -87,17 +126,47 @@ just a style guide.
   mask with a radial gradient or `backdrop-filter` rather than a
   hard-edged rectangle where that reads as more premium.
 
+## 6. Viral TikTok visual constraints & formulas
+
+From the @webloved viral design system — strict, literal formulas rather
+than general adjectives. These apply everywhere **except** the two
+permanent premium exceptions carved out in rules 2 and 4 (the hero's gold
+cursor glow and its bold-sans headline) — those were confirmed twice by
+the user specifically to sit outside this section's restraint, not
+overlooked.
+
+- **Constraints over adjectives**: strict design restraint. Max of two
+  colors, one typeface at two weights, and every single micro-interaction
+  execution time stays strictly under 400ms. Nothing moves unless the
+  user causes it.
+- **The gentle float**: drive hero imagery or food graphics with a
+  continuous sine wave, `y = amplitude * sin(time * speed)`, fed into the
+  animation loop every frame so elements breathe fluidly instead of
+  sitting dead on the canvas.
+- **Infinite technical mesh**: a zero-image dot matrix background made
+  from a single CSS `radial-gradient` tiled infinitely via
+  `background-size` — deep technical structure at zero image-load cost.
+- **Retina spatial tuning**: every custom canvas element maps explicitly
+  to `canvas.width = W * devicePixelRatio`, scaled via `ctx.scale(dpr,
+  dpr)`, to eliminate blur on high-density displays.
+
 ## Applying these rules
 
 When pulling a component from the 21st MCP or writing one from scratch:
 1. Check the component's transitions — convert any `ease`/`duration`
-   animation on interactive state changes to a spring per rule 1.
+   animation on interactive state changes to a spring per rule 1, using
+   the 340/30 or 500/30 named tier as appropriate rather than a new
+   one-off number. Both settle well inside rule 6's 400ms ceiling.
 2. Add magnetic hover to primary buttons and `layoutId` morphing to any
-   dropdown/modal/popover per rule 2.
+   dropdown/modal/popover per rule 2 — but not to plain scroll-reveal
+   entrances, which stay transform/opacity springs with a bare `layout`
+   for reflow smoothing.
 3. Confirm no animated property triggers layout; wrap scroll-driven
    effects in Lenis/Motion One per rule 3.
 4. Confirm typography follows the serif-display + sans-body pairing and
-   the tight layout geometry per rule 4.
+   the tight layout geometry per rule 4, and confirm colors stay ink/
+   paper per rule 6, except the hero's two permanent exceptions (gold
+   cursor glow, bold-sans headline) — don't extend either elsewhere.
 5. Run the Playwright screenshot pass on every visual state (default,
    hover, open/active), self-critique alignment/spacing/contrast, and
    only then build + push, per rule 5.

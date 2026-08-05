@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FocusEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import {
   cancelReservation,
   createReservation,
@@ -10,10 +18,10 @@ import {
   type ReservationInput,
 } from "@/lib/reservations";
 
-/** High-velocity default, per explicit direction: replaces rule 1's
- * standard 100/15 panel tier with a crisper spring site-wide. */
-const ENTRANCE_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
-const PRESS_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier. */
+const ENTRANCE_SPRING = { type: "spring", stiffness: 340, damping: 30 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier. */
+const PRESS_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 
 const EMPTY_FORM: ReservationInput = {
   name: "",
@@ -29,6 +37,36 @@ const FIELD_CLASS =
   "w-full border-b border-ink/15 bg-transparent py-2 font-sans text-sm text-ink outline-none transition-colors duration-200 placeholder:text-ink/30 focus:border-ink";
 const LABEL_CLASS =
   "font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-ink/50";
+
+/** Wraps a form field so it grows slightly on focus — layout-driven (rule
+ * 3's sanctioned exception) rather than a raw width/padding transition,
+ * giving immediate feedback per the micro-interaction spec. */
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  const prefersReducedMotion = useReducedMotion();
+  const [focused, setFocused] = useState(false);
+
+  function handleFocus(e: FocusEvent<HTMLLabelElement>) {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+      setFocused(true);
+    }
+  }
+
+  return (
+    <motion.label
+      layout
+      onFocus={handleFocus}
+      onBlur={() => setFocused(false)}
+      animate={
+        prefersReducedMotion ? undefined : { scale: focused ? 1.03 : 1 }
+      }
+      transition={prefersReducedMotion ? { duration: 0 } : PRESS_SPRING}
+      className="flex origin-left flex-col gap-2"
+    >
+      <span className={LABEL_CLASS}>{label}</span>
+      {children}
+    </motion.label>
+  );
+}
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -65,8 +103,11 @@ function ReservationRow({
       initial={{ opacity: 0, y: 12, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
+      whileHover={
+        prefersReducedMotion ? undefined : { scale: 1.015, transition: PRESS_SPRING }
+      }
       transition={prefersReducedMotion ? { duration: 0 } : ENTRANCE_SPRING}
-      className="flex items-center justify-between gap-4 border-b border-ink/10 py-4"
+      className="flex items-center justify-between gap-4 rounded-lg border-b border-ink/10 px-2 py-4"
     >
       <div>
         <p className="font-display text-lg italic text-ink">
@@ -147,8 +188,7 @@ export function ReservationForm() {
     <div>
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <label className="flex flex-col gap-2">
-            <span className={LABEL_CLASS}>Name</span>
+          <Field label="Name">
             <input
               name="name"
               value={form.name}
@@ -156,9 +196,8 @@ export function ReservationForm() {
               placeholder="Jane Doe"
               className={FIELD_CLASS}
             />
-          </label>
-          <label className="flex flex-col gap-2">
-            <span className={LABEL_CLASS}>Phone</span>
+          </Field>
+          <Field label="Phone">
             <input
               name="phone"
               type="tel"
@@ -167,11 +206,10 @@ export function ReservationForm() {
               placeholder="(555) 010-2000"
               className={FIELD_CLASS}
             />
-          </label>
+          </Field>
         </div>
 
-        <label className="flex flex-col gap-2">
-          <span className={LABEL_CLASS}>Email</span>
+        <Field label="Email">
           <input
             name="email"
             type="email"
@@ -180,11 +218,10 @@ export function ReservationForm() {
             placeholder="jane@example.com"
             className={FIELD_CLASS}
           />
-        </label>
+        </Field>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <label className="flex flex-col gap-2">
-            <span className={LABEL_CLASS}>Date</span>
+          <Field label="Date">
             <input
               name="date"
               type="date"
@@ -193,9 +230,8 @@ export function ReservationForm() {
               onChange={handleChange}
               className={FIELD_CLASS}
             />
-          </label>
-          <label className="flex flex-col gap-2">
-            <span className={LABEL_CLASS}>Time</span>
+          </Field>
+          <Field label="Time">
             <input
               name="time"
               type="time"
@@ -203,9 +239,8 @@ export function ReservationForm() {
               onChange={handleChange}
               className={FIELD_CLASS}
             />
-          </label>
-          <label className="flex flex-col gap-2">
-            <span className={LABEL_CLASS}>Party size</span>
+          </Field>
+          <Field label="Party size">
             <input
               name="partySize"
               type="number"
@@ -215,11 +250,10 @@ export function ReservationForm() {
               onChange={handleChange}
               className={FIELD_CLASS}
             />
-          </label>
+          </Field>
         </div>
 
-        <label className="flex flex-col gap-2">
-          <span className={LABEL_CLASS}>Notes (optional)</span>
+        <Field label="Notes (optional)">
           <textarea
             name="notes"
             value={form.notes}
@@ -228,7 +262,7 @@ export function ReservationForm() {
             rows={2}
             className={`${FIELD_CLASS} resize-none`}
           />
-        </label>
+        </Field>
 
         <AnimatePresence mode="wait">
           {error && (

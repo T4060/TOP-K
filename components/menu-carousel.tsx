@@ -2,26 +2,19 @@
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Image from "next/image";
-import {
-  animate,
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useSpring,
-} from "framer-motion";
+import { animate, motion, useMotionValue, useSpring } from "framer-motion";
+import { AmbientCanvas } from "@/components/ambient-canvas";
+import { Stagger, StaggerItem } from "@/components/stagger";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { cn } from "@/lib/utils";
 
-/** High-velocity default, per explicit direction: replaces rule 1's
- * standard 100/15 panel tier with a crisper spring site-wide, including
- * this track's drag-release pan. */
-const PAN_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
-/** Small-element tier from rule 1's tuning note, reused for card hover
- * lift and arrow-button press feedback. */
-const HOVER_SPRING = { type: "spring", stiffness: 300, damping: 26 } as const;
-/** Snappier tier for the arrow buttons — small, directly tracked, and
- * meant to feel immediate per rule 1's tuning note. */
-const SNAP_SPRING = { type: "spring", stiffness: 420, damping: 26 } as const;
-/** Pointer-tilt spring for dish-card hover. */
-const TILT_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier, for this
+ * track's drag-release pan and section entrance. */
+const PAN_SPRING = { type: "spring", stiffness: 340, damping: 30 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier, for
+ * card hover lift, arrow-button press feedback, and dish-card tilt
+ * tracking (one constant, reused, rather than three identical ones). */
+const SNAP_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 const TILT_DEGREES = 6;
 
 const CARD_WIDTH = 300;
@@ -92,15 +85,22 @@ function ArrowButton({
   direction: "left" | "right";
   onClick: () => void;
 }) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <motion.button
       type="button"
       onClick={onClick}
-      whileHover={{ scale: 1.1 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      layout
       whileTap={{ scale: 0.88 }}
       transition={SNAP_SPRING}
       aria-label={direction === "left" ? "Previous dish" : "Next dish"}
-      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-paper/20 text-paper transition-colors duration-200 hover:border-paper/40 hover:bg-paper/10"
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-full border border-paper/20 text-paper transition-colors duration-200 hover:border-paper/40 hover:bg-paper/10",
+        isHovered ? "h-12 w-12" : "h-11 w-11"
+      )}
     >
       <svg
         width="16"
@@ -130,11 +130,12 @@ function DishCard({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const entrance = prefersReducedMotion ? { duration: 0 } : PAN_SPRING;
+  const hover = prefersReducedMotion ? { duration: 0 } : SNAP_SPRING;
 
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
-  const springRotateX = useSpring(rotateX, TILT_SPRING);
-  const springRotateY = useSpring(rotateY, TILT_SPRING);
+  const springRotateX = useSpring(rotateX, SNAP_SPRING);
+  const springRotateY = useSpring(rotateY, SNAP_SPRING);
 
   function handleMouseMove(e: MouseEvent<HTMLDivElement>) {
     if (prefersReducedMotion) return;
@@ -154,14 +155,15 @@ function DishCard({
     <motion.div
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ scale: 0.94, y: 24 }}
+      whileInView={{ scale: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
-      whileHover={prefersReducedMotion ? undefined : { y: -6, scale: 1.02 }}
+      whileHover={
+        prefersReducedMotion ? undefined : { y: -6, scale: 1.02, transition: hover }
+      }
       transition={{
-        opacity: { ...entrance, delay: index * 0.06 },
+        scale: { ...entrance, delay: index * 0.06 },
         y: { ...entrance, delay: index * 0.06 },
-        scale: prefersReducedMotion ? { duration: 0 } : HOVER_SPRING,
       }}
       style={
         prefersReducedMotion
@@ -243,31 +245,28 @@ export function MenuCarousel() {
 
   return (
     <section id="menu" className="relative scroll-mt-24 bg-ink px-6 pb-32 pt-8 text-paper">
-      <div className="mx-auto max-w-5xl">
+      <AmbientCanvas
+        className="absolute inset-0 [mask-image:radial-gradient(100%_60%_at_50%_0%,white,transparent)]"
+        color="#fafaf9"
+        maxOpacity={0.06}
+        flickerChance={0.1}
+        squareSize={3}
+        gridGap={7}
+      />
+      <div className="relative mx-auto max-w-5xl">
         <div className="flex items-end justify-between gap-6">
-          <div>
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.6 }}
-              transition={prefersReducedMotion ? { duration: 0 } : PAN_SPRING}
-              className="font-sans text-xs font-medium uppercase tracking-[0.2em] text-paper/40"
-            >
-              Tasting menu
-            </motion.p>
-            <motion.h2
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.6 }}
-              transition={{
-                ...(prefersReducedMotion ? { duration: 0 } : PAN_SPRING),
-                delay: prefersReducedMotion ? 0 : 0.08,
-              }}
-              className="mt-4 max-w-xl font-display text-5xl italic leading-[1.02] tracking-tighter sm:text-6xl"
-            >
-              A menu, considered.
-            </motion.h2>
-          </div>
+          <Stagger>
+            <StaggerItem>
+              <p className="font-sans text-xs font-medium uppercase tracking-[0.2em] text-paper/40">
+                Tasting menu
+              </p>
+            </StaggerItem>
+            <StaggerItem className="mt-4">
+              <h2 className="max-w-xl font-display text-5xl italic leading-[1.02] tracking-tighter sm:text-6xl">
+                A menu, considered.
+              </h2>
+            </StaggerItem>
+          </Stagger>
           <div className="hidden shrink-0 gap-3 md:flex">
             <ArrowButton direction="left" onClick={() => pan(-1)} />
             <ArrowButton direction="right" onClick={() => pan(1)} />

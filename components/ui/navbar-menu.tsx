@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** High-velocity default, per explicit direction: replaces rule 1's
- * standard 100/15 panel tier with a crisper spring site-wide. */
-const DEFAULT_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier, for the
+ * layoutId-driven highlight pill and dropdown morph. */
+const DEFAULT_SPRING = { type: "spring", stiffness: 340, damping: 30 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier, for
+ * the menu-item button's own hover/press feedback. */
+const HOVER_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 
 export function Menu({
   setActive,
@@ -43,6 +47,7 @@ export function MenuItem({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const transition = prefersReducedMotion ? { duration: 0 } : DEFAULT_SPRING;
+  const hover = prefersReducedMotion ? { duration: 0 } : HOVER_SPRING;
 
   return (
     <div
@@ -50,12 +55,22 @@ export function MenuItem({
       onFocus={() => setActive(item)}
       className="relative"
     >
-      <button
+      {active === item && (
+        <motion.div
+          layoutId="navbar-highlight"
+          transition={transition}
+          className="absolute inset-x-[-10px] inset-y-[-8px] -z-10 rounded-full bg-ink/5"
+        />
+      )}
+      <motion.button
         type="button"
-        className="font-sans text-sm text-ink/80 transition-colors duration-200 hover:text-ink"
+        whileHover={{ scale: prefersReducedMotion ? 1 : 1.06 }}
+        whileTap={{ scale: prefersReducedMotion ? 1 : 0.94 }}
+        transition={hover}
+        className="relative font-sans text-sm text-ink/80 transition-colors duration-200 hover:text-ink"
       >
         {item}
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {active === item && children && (

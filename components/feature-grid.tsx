@@ -5,27 +5,28 @@ import {
   AnimatePresence,
   motion,
   useMotionValue,
-  useReducedMotion,
   useSpring,
   type Transition,
 } from "framer-motion";
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import { AmbientCanvas } from "@/components/ambient-canvas";
+import { Stagger, StaggerItem } from "@/components/stagger";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** Pointer-tilt spring — snappy per rule 1's tuning note since it's
- * tracking the cursor directly. */
-const TILT_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
+/** Pointer-tilt spring — CLAUDE.md rule 1's 500/30 named tier, since
+ * it's tracking the cursor directly. */
+const TILT_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 const TILT_DEGREES = 8;
 
-/** High-velocity default, per explicit direction: replaces rule 1's
- * standard 100/15 panel tier with a crisper spring for entrance and
- * shared-layout transitions on this section. */
-const ENTRANCE_SPRING: Transition = { type: "spring", stiffness: 220, damping: 20 };
-/** Hover spring: stiffer per rule 1's tuning note for small, immediate
- * feedback (matches the magnetic button / navbar dropdown snappy tier). */
-const HOVER_SPRING: Transition = { type: "spring", stiffness: 300, damping: 26 };
-/** Shared-layout spring driving the click-to-expand card morph. */
-const EXPAND_SPRING: Transition = { type: "spring", stiffness: 220, damping: 24 };
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier, for
+ * scroll-entrance and shared-layout transitions on this section. */
+const ENTRANCE_SPRING: Transition = { type: "spring", stiffness: 340, damping: 30 };
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier, for
+ * direct hover/press feedback. */
+const HOVER_SPRING: Transition = { type: "spring", stiffness: 500, damping: 30 };
+/** Shared-layout spring driving the click-to-expand card morph — fluid
+ * layout tier. */
+const EXPAND_SPRING: Transition = { type: "spring", stiffness: 340, damping: 30 };
 
 const FEATURES = [
   {
@@ -131,14 +132,17 @@ function FeatureCard({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={isActive ? undefined : onOpen}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ scale: 0.94, y: 24 }}
+      whileInView={{ scale: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
-      whileHover={prefersReducedMotion || isActive ? undefined : { scale: 1.02 }}
+      whileHover={
+        prefersReducedMotion || isActive
+          ? undefined
+          : { scale: 1.02, transition: hover }
+      }
       transition={{
-        opacity: { ...entrance, delay: index * 0.08 },
+        scale: { ...entrance, delay: index * 0.08 },
         y: { ...entrance, delay: index * 0.08 },
-        scale: hover,
         layout: expandTransition,
       }}
       style={
@@ -157,9 +161,8 @@ function FeatureCard({
           : feature.span
       )}
     >
-      {/* Dynamic canvas texture, not a static block — same technique as
-       * the hero's FlickeringGrid, kept dark/subtle here. */}
-      <FlickeringGrid
+      {/* Dynamic, breathing canvas texture, not a static block. */}
+      <AmbientCanvas
         className="absolute inset-0 [mask-image:radial-gradient(120%_90%_at_30%_20%,white,transparent)]"
         color="#fafaf9"
         maxOpacity={0.08}
@@ -212,7 +215,6 @@ function FeatureCard({
 
 export function FeatureGrid() {
   const prefersReducedMotion = useReducedMotion();
-  const entrance = prefersReducedMotion ? { duration: 0 } : ENTRANCE_SPRING;
   const [activeTitle, setActiveTitle] = useState<string | null>(null);
 
   useEffect(() => {
@@ -227,24 +229,18 @@ export function FeatureGrid() {
   return (
     <section className="relative bg-ink px-6 py-32 text-paper">
       <div className="mx-auto max-w-5xl">
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={entrance}
-          className="font-sans text-xs font-medium uppercase tracking-[0.2em] text-paper/40"
-        >
-          The system
-        </motion.p>
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={{ ...entrance, delay: prefersReducedMotion ? 0 : 0.08 }}
-          className="mt-4 max-w-xl font-display text-5xl italic leading-[1.02] tracking-tighter text-paper sm:text-6xl"
-        >
-          Built on first principles.
-        </motion.h2>
+        <Stagger>
+          <StaggerItem>
+            <p className="font-sans text-xs font-medium uppercase tracking-[0.2em] text-paper/40">
+              The system
+            </p>
+          </StaggerItem>
+          <StaggerItem className="mt-4">
+            <h2 className="max-w-xl font-display text-5xl italic leading-[1.02] tracking-tighter text-paper sm:text-6xl">
+              Built on first principles.
+            </h2>
+          </StaggerItem>
+        </Stagger>
 
         <div className="mt-16 grid grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[180px]">
           {FEATURES.map((feature, index) => (
