@@ -2,12 +2,8 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useReducedMotion,
-} from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
 const MotionLink = motion.create(Link);
@@ -64,7 +60,9 @@ export function MagneticButton({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={prefersReducedMotion ? undefined : { x: springX, y: springY }}
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.04 }}
       whileTap={{ scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className={cn(
         "inline-flex items-center justify-center rounded-full bg-ink font-sans font-medium tracking-wide text-paper transition-colors duration-200 hover:bg-ink/90",
         SIZE_STYLES[size],

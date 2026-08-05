@@ -5,11 +5,12 @@ import {
   AnimatePresence,
   motion,
   useMotionValue,
-  useReducedMotion,
   useSpring,
   type Transition,
 } from "framer-motion";
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import { AmbientCanvas } from "@/components/ambient-canvas";
+import { Stagger, StaggerItem } from "@/components/stagger";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
 /** Pointer-tilt spring — snappy per rule 1's tuning note since it's
@@ -131,14 +132,17 @@ function FeatureCard({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={isActive ? undefined : onOpen}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ scale: 0.94, y: 24 }}
+      whileInView={{ scale: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
-      whileHover={prefersReducedMotion || isActive ? undefined : { scale: 1.02 }}
+      whileHover={
+        prefersReducedMotion || isActive
+          ? undefined
+          : { scale: 1.02, transition: hover }
+      }
       transition={{
-        opacity: { ...entrance, delay: index * 0.08 },
+        scale: { ...entrance, delay: index * 0.08 },
         y: { ...entrance, delay: index * 0.08 },
-        scale: hover,
         layout: expandTransition,
       }}
       style={
@@ -157,9 +161,8 @@ function FeatureCard({
           : feature.span
       )}
     >
-      {/* Dynamic canvas texture, not a static block — same technique as
-       * the hero's FlickeringGrid, kept dark/subtle here. */}
-      <FlickeringGrid
+      {/* Dynamic, breathing canvas texture, not a static block. */}
+      <AmbientCanvas
         className="absolute inset-0 [mask-image:radial-gradient(120%_90%_at_30%_20%,white,transparent)]"
         color="#fafaf9"
         maxOpacity={0.08}
@@ -212,7 +215,6 @@ function FeatureCard({
 
 export function FeatureGrid() {
   const prefersReducedMotion = useReducedMotion();
-  const entrance = prefersReducedMotion ? { duration: 0 } : ENTRANCE_SPRING;
   const [activeTitle, setActiveTitle] = useState<string | null>(null);
 
   useEffect(() => {
@@ -227,24 +229,18 @@ export function FeatureGrid() {
   return (
     <section className="relative bg-ink px-6 py-32 text-paper">
       <div className="mx-auto max-w-5xl">
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={entrance}
-          className="font-sans text-xs font-medium uppercase tracking-[0.2em] text-paper/40"
-        >
-          The system
-        </motion.p>
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={{ ...entrance, delay: prefersReducedMotion ? 0 : 0.08 }}
-          className="mt-4 max-w-xl font-display text-5xl italic leading-[1.02] tracking-tighter text-paper sm:text-6xl"
-        >
-          Built on first principles.
-        </motion.h2>
+        <Stagger>
+          <StaggerItem>
+            <p className="font-sans text-xs font-medium uppercase tracking-[0.2em] text-paper/40">
+              The system
+            </p>
+          </StaggerItem>
+          <StaggerItem className="mt-4">
+            <h2 className="max-w-xl font-display text-5xl italic leading-[1.02] tracking-tighter text-paper sm:text-6xl">
+              Built on first principles.
+            </h2>
+          </StaggerItem>
+        </Stagger>
 
         <div className="mt-16 grid grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[180px]">
           {FEATURES.map((feature, index) => (
