@@ -6,12 +6,12 @@ import { ReservationForm } from "@/components/reservation-form";
 import { Stagger, StaggerItem } from "@/components/stagger";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
-/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier, for
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier, for
  * the hours list's hover-driven layout growth. */
-const ROW_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
-/** Fluid layout tier — CLAUDE.md rule 1's 220/20 named tier, for the
+const ROW_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier, for the
  * form panel's entrance. */
-const PANEL_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
+const PANEL_SPRING = { type: "spring", stiffness: 340, damping: 30 } as const;
 
 const HOURS = [
   { day: "Mon – Thu", time: "5 PM – 12 AM" },

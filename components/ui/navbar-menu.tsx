@@ -5,12 +5,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** Fluid layout tier — CLAUDE.md rule 1's 220/20 named tier, for the
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier, for the
  * layoutId-driven highlight pill and dropdown morph. */
-const DEFAULT_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
-/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier, for
+const DEFAULT_SPRING = { type: "spring", stiffness: 340, damping: 30 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier, for
  * the menu-item button's own hover/press feedback. */
-const HOVER_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
+const HOVER_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 
 export function Menu({
   setActive,

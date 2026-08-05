@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** High-velocity default, per explicit direction. */
-const SNAP_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier. */
+const FLUID_SPRING = { type: "spring", stiffness: 340, damping: 30 } as const;
 
 const containerVariants: Variants = {
   hidden: {},
@@ -15,13 +15,14 @@ const containerVariants: Variants = {
 
 const itemVariants: Variants = {
   hidden: { scale: 0.94, y: 24 },
-  show: { scale: 1, y: 0, transition: SNAP_SPRING },
+  show: { scale: 1, y: 0, transition: FLUID_SPRING },
 };
 
 /**
  * Master stagger wrapper: section entrances scale + glide up rather than
- * fade, on the 220/20 spring, staggered across children via Framer
- * Motion's own staggerChildren rather than manual index * delay math.
+ * fade, on the 340/30 fluid-layout spring, staggered across children via
+ * Framer Motion's own staggerChildren rather than manual index * delay
+ * math. Settles well under rule 6's 400ms ceiling.
  */
 export function Stagger({
   children,

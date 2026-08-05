@@ -13,19 +13,20 @@ import { Stagger, StaggerItem } from "@/components/stagger";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** Pointer-tilt spring — CLAUDE.md rule 1's 280/18 named tier, since
+/** Pointer-tilt spring — CLAUDE.md rule 1's 500/30 named tier, since
  * it's tracking the cursor directly. */
-const TILT_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
+const TILT_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 const TILT_DEGREES = 8;
 
-/** Fluid layout tier — CLAUDE.md rule 1's 220/20 named tier, for
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier, for
  * scroll-entrance and shared-layout transitions on this section. */
-const ENTRANCE_SPRING: Transition = { type: "spring", stiffness: 220, damping: 20 };
-/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier, for
+const ENTRANCE_SPRING: Transition = { type: "spring", stiffness: 340, damping: 30 };
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier, for
  * direct hover/press feedback. */
-const HOVER_SPRING: Transition = { type: "spring", stiffness: 280, damping: 18 };
-/** Shared-layout spring driving the click-to-expand card morph. */
-const EXPAND_SPRING: Transition = { type: "spring", stiffness: 220, damping: 24 };
+const HOVER_SPRING: Transition = { type: "spring", stiffness: 500, damping: 30 };
+/** Shared-layout spring driving the click-to-expand card morph — fluid
+ * layout tier. */
+const EXPAND_SPRING: Transition = { type: "spring", stiffness: 340, damping: 30 };
 
 const FEATURES = [
   {

@@ -8,17 +8,13 @@ import { Stagger, StaggerItem } from "@/components/stagger";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-/** Fluid layout tier — CLAUDE.md rule 1's 220/20 named tier, for this
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier, for this
  * track's drag-release pan and section entrance. */
-const PAN_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
-/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier, for
- * card hover lift and arrow-button press feedback. */
-const HOVER_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
-/** Same 280/18 snap tier — arrow buttons are small and directly tracked,
- * so they get the immediate-pop treatment too. */
-const SNAP_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
-/** Pointer-tilt spring for dish-card hover — 280/18 snap tier. */
-const TILT_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
+const PAN_SPRING = { type: "spring", stiffness: 340, damping: 30 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier, for
+ * card hover lift, arrow-button press feedback, and dish-card tilt
+ * tracking (one constant, reused, rather than three identical ones). */
+const SNAP_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 const TILT_DEGREES = 6;
 
 const CARD_WIDTH = 300;
@@ -134,12 +130,12 @@ function DishCard({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const entrance = prefersReducedMotion ? { duration: 0 } : PAN_SPRING;
-  const hover = prefersReducedMotion ? { duration: 0 } : HOVER_SPRING;
+  const hover = prefersReducedMotion ? { duration: 0 } : SNAP_SPRING;
 
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
-  const springRotateX = useSpring(rotateX, TILT_SPRING);
-  const springRotateY = useSpring(rotateY, TILT_SPRING);
+  const springRotateX = useSpring(rotateX, SNAP_SPRING);
+  const springRotateY = useSpring(rotateY, SNAP_SPRING);
 
   function handleMouseMove(e: MouseEvent<HTMLDivElement>) {
     if (prefersReducedMotion) return;

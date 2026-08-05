@@ -18,10 +18,10 @@ import {
   type ReservationInput,
 } from "@/lib/reservations";
 
-/** Fluid layout tier — CLAUDE.md rule 1's 220/20 named tier. */
-const ENTRANCE_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
-/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier. */
-const PRESS_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
+/** Fluid layout tier — CLAUDE.md rule 1's 340/30 named tier. */
+const ENTRANCE_SPRING = { type: "spring", stiffness: 340, damping: 30 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier. */
+const PRESS_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 
 const EMPTY_FORM: ReservationInput = {
   name: "",

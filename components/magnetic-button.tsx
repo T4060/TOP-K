@@ -8,13 +8,13 @@ import { cn } from "@/lib/utils";
 
 const MotionLink = motion.create(Link);
 
-/** Snappy interaction tier — CLAUDE.md rule 1's 280/18 named tier. */
-const SNAP_SPRING = { type: "spring", stiffness: 280, damping: 18 } as const;
+/** Snappy interaction tier — CLAUDE.md rule 1's 500/30 named tier. */
+const SNAP_SPRING = { type: "spring", stiffness: 500, damping: 30 } as const;
 
 /**
  * Primary CTA per CLAUDE.md rule 2: pulls toward the cursor within a
  * bounded radius, springs back to rest on leave. Driven by `translate`
- * only (rule 3) via a spring (rule 1) — the 280/18 snap tier since a
+ * only (rule 3) via a spring (rule 1) — the 500/30 snap tier since a
  * small tracked element reads better crisp.
  */
 const SIZE_STYLES = {

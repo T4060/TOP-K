@@ -18,18 +18,18 @@ just a style guide.
   panels) should stay closer to the default so they feel weighted, not
   twitchy.
 - **Named tiers in use on this project**, so components stay consistent
-  instead of each inventing its own numbers:
-  - `{ stiffness: 220, damping: 20 }` — fluid layout entrances: section
+  instead of each inventing its own numbers. Both are hardened to settle
+  in well under rule 6's 400ms ceiling — this project no longer keeps a
+  deliberately "slow"/inertial tier; every micro-interaction resolves
+  fast:
+  - `{ stiffness: 340, damping: 30 }` — fluid layout: section
     scroll-reveals, shared-layout (`layoutId`) morphs, drag-release pans.
-  - `{ stiffness: 280, damping: 18 }` — snappy interaction pop: button and
+    Weightier than the snap tier below, but still settles in ~250-300ms.
+  - `{ stiffness: 500, damping: 30 }` — snappy interaction pop: button and
     card `whileHover`/`whileTap`, magnetic-follow tracking, any
-    hover-driven `layout` size growth. This is the "instantly snap or
-    pop" tier — reach for it on anything the user is directly pointing at
-    or pressing.
-  - Cursor-tracking ambient lights (see rule 2's magnetic-glow note) stay
-    on a *softer* spring than either tier above (lower stiffness, added
-    `mass`) so the light trails the cursor with visible inertia instead
-    of snapping — the inertia is the point, not a bug to tune out.
+    hover-driven `layout` size growth, pointer-tilt tracking. This is the
+    "instantly snap or pop" tier — reach for it on anything the user is
+    directly pointing at or pressing.
 - Only reach for duration-based `tween` easing when a spring genuinely
   doesn't fit (e.g. looping/indeterminate animations). Justify the
   exception in a comment when it happens.
@@ -55,13 +55,13 @@ just a style guide.
 - Every interactive element (button, link, input, menu item) has an
   explicit hover and active/pressed state — no bare default browser
   affordances.
-- **Documented exception — hero cursor glow is metallic gold.** The hero
-  section's full-bleed cursor-tracking light is gold (`#d4af37`-family),
-  not paper-white. This is a deliberate, explicit exception to rule 4's
-  two-tone system, scoped *only* to that one hero glow effect — it does
-  not license gold anywhere else (buttons, text, borders, other
-  sections' ambient canvases all stay ink/paper). Requested and
-  confirmed directly by the user over the two-tone default.
+- **The hero's gold cursor-glow exception has been reverted.** Rule 6's
+  two-color restraint now takes priority: the hero no longer has a
+  cursor-tracking glow of any color. It kept the full-bleed kinetic grid
+  background (that's monochrome paper-on-ink already, no exception
+  needed) but the extra glow layer — which was both a third color and a
+  deliberately slow/inertial spring — is gone. Don't reintroduce a
+  colored ambient light without revisiting this note.
 
 ## 3. Smoothness & performance
 
@@ -148,8 +148,8 @@ than general adjectives:
 When pulling a component from the 21st MCP or writing one from scratch:
 1. Check the component's transitions — convert any `ease`/`duration`
    animation on interactive state changes to a spring per rule 1, using
-   the 220/20 or 280/18 named tier as appropriate rather than a new
-   one-off number.
+   the 340/30 or 500/30 named tier as appropriate rather than a new
+   one-off number. Both settle well inside rule 6's 400ms ceiling.
 2. Add magnetic hover to primary buttons and `layoutId` morphing to any
    dropdown/modal/popover per rule 2 — but not to plain scroll-reveal
    entrances, which stay transform/opacity springs with a bare `layout`
