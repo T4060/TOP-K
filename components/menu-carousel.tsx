@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Image from "next/image";
-import { animate, motion, useMotionValue, useReducedMotion } from "framer-motion";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+} from "framer-motion";
 
 /** Panel-level pan: the CLAUDE.md rule-1 default (100/15) — this track is
  * a large surface, so it stays weighted rather than snappy. */
@@ -10,6 +16,12 @@ const PAN_SPRING = { type: "spring", stiffness: 100, damping: 15 } as const;
 /** Small-element tier from rule 1's tuning note, reused for card hover
  * lift and arrow-button press feedback. */
 const HOVER_SPRING = { type: "spring", stiffness: 300, damping: 26 } as const;
+/** Snappier tier for the arrow buttons — small, directly tracked, and
+ * meant to feel immediate per rule 1's tuning note. */
+const SNAP_SPRING = { type: "spring", stiffness: 420, damping: 26 } as const;
+/** Pointer-tilt spring for dish-card hover. */
+const TILT_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
+const TILT_DEGREES = 6;
 
 const CARD_WIDTH = 300;
 const CARD_GAP = 24;
@@ -84,8 +96,9 @@ function ArrowButton({
     <motion.button
       type="button"
       onClick={onClick}
-      whileTap={{ scale: 0.9 }}
-      transition={HOVER_SPRING}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.88 }}
+      transition={SNAP_SPRING}
       aria-label={direction === "left" ? "Previous dish" : "Next dish"}
       className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-paper/20 text-paper transition-colors duration-200 hover:border-paper/40 hover:bg-paper/10"
     >
@@ -118,8 +131,29 @@ function DishCard({
   const prefersReducedMotion = useReducedMotion();
   const entrance = prefersReducedMotion ? { duration: 0 } : PAN_SPRING;
 
+  const rotateX = useMotionValue(0);
+  const rotateY = useMotionValue(0);
+  const springRotateX = useSpring(rotateX, TILT_SPRING);
+  const springRotateY = useSpring(rotateY, TILT_SPRING);
+
+  function handleMouseMove(e: MouseEvent<HTMLDivElement>) {
+    if (prefersReducedMotion) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relX = (e.clientX - rect.left) / rect.width - 0.5;
+    const relY = (e.clientY - rect.top) / rect.height - 0.5;
+    rotateY.set(relX * TILT_DEGREES);
+    rotateX.set(relY * -TILT_DEGREES);
+  }
+
+  function handleMouseLeave() {
+    rotateX.set(0);
+    rotateY.set(0);
+  }
+
   return (
     <motion.div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
@@ -129,6 +163,15 @@ function DishCard({
         y: { ...entrance, delay: index * 0.06 },
         scale: prefersReducedMotion ? { duration: 0 } : HOVER_SPRING,
       }}
+      style={
+        prefersReducedMotion
+          ? undefined
+          : {
+              rotateX: springRotateX,
+              rotateY: springRotateY,
+              transformPerspective: 800,
+            }
+      }
       className="group relative h-[440px] w-[300px] shrink-0 overflow-hidden rounded-3xl border border-paper/10 transition-colors duration-200 hover:border-paper/25"
     >
       <Image
