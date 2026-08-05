@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion, type Transition } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +11,11 @@ const ENTRANCE_SPRING: Transition = { type: "spring", stiffness: 100, damping: 1
  * feedback (matches the magnetic button / navbar dropdown snappy tier). */
 const HOVER_SPRING: Transition = { type: "spring", stiffness: 300, damping: 26 };
 
+/** Same Unsplash source as the tasting-menu carousel (already verified live
+ * in production). Reused here as ambient background texture — cropped in
+ * tight and heavily blurred so they read as abstract light/color rather
+ * than literal food photography, which keeps them from fighting the card
+ * copy while still giving the section real photographic depth. */
 const FEATURES = [
   {
     eyebrow: "01",
@@ -18,6 +24,7 @@ const FEATURES = [
       "Every transition is driven by a tuned spring, never a linear ease, so motion resolves the way physical objects do.",
     featured: true,
     span: "md:col-span-2 md:row-span-2",
+    image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=70",
   },
   {
     eyebrow: "02",
@@ -26,6 +33,7 @@ const FEATURES = [
       "Primary actions pull toward the cursor and settle on the same spring language used everywhere else.",
     featured: false,
     span: "",
+    image: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=900&q=70",
   },
   {
     eyebrow: "03",
@@ -34,6 +42,7 @@ const FEATURES = [
       "A serif display face carries every headline; a neutral sans handles body copy and UI chrome. Nothing else.",
     featured: false,
     span: "",
+    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=900&q=70",
   },
   {
     eyebrow: "04",
@@ -42,6 +51,7 @@ const FEATURES = [
       "Two tones, ink and paper, inverted by section — never a third color competing for attention.",
     featured: false,
     span: "",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=70",
   },
   {
     eyebrow: "05",
@@ -50,6 +60,7 @@ const FEATURES = [
       "Tight spacing, deliberate negative space, no ad hoc margins.",
     featured: false,
     span: "md:col-span-2",
+    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=70",
   },
 ] as const;
 
@@ -77,14 +88,24 @@ function FeatureCard({
         scale: hover,
       }}
       className={cn(
-        "group relative flex scroll-mt-24 flex-col justify-between overflow-hidden rounded-3xl border border-paper/10 bg-paper/[0.03] p-8 transition-colors duration-200 hover:border-paper/20 hover:bg-paper/[0.05]",
+        "group relative flex scroll-mt-24 flex-col justify-between overflow-hidden rounded-3xl border border-paper/10 bg-ink p-8 transition-colors duration-200 hover:border-paper/20",
         feature.span
       )}
     >
-      <span className="font-sans text-xs tracking-[0.2em] text-paper/40">
+      <Image
+        src={feature.image}
+        alt=""
+        aria-hidden="true"
+        fill
+        sizes="(min-width: 768px) 33vw, 100vw"
+        className="scale-125 object-cover opacity-40 blur-2xl saturate-50 transition-transform duration-500 ease-out group-hover:scale-[1.35]"
+      />
+      <div className="absolute inset-0 bg-ink/45" />
+
+      <span className="relative font-sans text-xs tracking-[0.2em] text-paper/40">
         {feature.eyebrow}
       </span>
-      <div className="mt-auto">
+      <div className="relative mt-auto">
         <h3
           className={cn(
             "font-display italic text-paper",
