@@ -61,6 +61,32 @@ just a style guide.
   `letter-spacing` than body text to read as "editorial," not default
   browser heading sizes.
 
+## 5. Design fidelity & validation workflow
+
+- **Figma translation**: when a Figma MCP connector is attached to the
+  session, pull the source frame's spacing/type variables directly rather
+  than eyeballing values, and translate them into Tailwind `clamp()`-based
+  fluid scales and `tracking-*` utilities instead of hardcoding fixed px
+  values. No Figma connector is attached to this project as of writing —
+  flag that explicitly rather than fabricating a pull, and fall back to
+  matching the given reference/spec by eye until one is connected.
+- **Visual validation is mandatory, not optional**: after generating or
+  editing markup for any visual component, run a headless Playwright
+  screenshot pass (build → dev server → screenshot each interactive
+  state — default, hover, open/active) before committing. Self-critique
+  spatial alignment, spacing rhythm, and type-scale contrast against this
+  file before pushing. There is no dedicated Playwright MCP tool in this
+  environment; drive the globally-installed Playwright package directly
+  (see prior commits for the pattern) rather than claiming a "server"
+  that isn't there.
+- **Motion orchestration**: a single-property linear opacity fade is not
+  an acceptable entrance animation. Combine at least two spring-driven
+  properties (e.g. `opacity` + `y`, or `opacity` + `scale`) per rule 1,
+  and prefer staggering across siblings over animating them in lockstep.
+  Panel-style containers (modals, feature cards, hero backdrops) should
+  mask with a radial gradient or `backdrop-filter` rather than a
+  hard-edged rectangle where that reads as more premium.
+
 ## Applying these rules
 
 When pulling a component from the 21st MCP or writing one from scratch:
@@ -72,6 +98,9 @@ When pulling a component from the 21st MCP or writing one from scratch:
    effects in Lenis/Motion One per rule 3.
 4. Confirm typography follows the serif-display + sans-body pairing and
    the tight layout geometry per rule 4.
+5. Run the Playwright screenshot pass on every visual state (default,
+   hover, open/active), self-critique alignment/spacing/contrast, and
+   only then build + push, per rule 5.
 
 Do not merge a component that violates any of the above without a
 comment explaining the exception.
