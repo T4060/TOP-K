@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { animate, motion, useMotionValue, useReducedMotion } from "framer-motion";
 
 /** Panel-level pan: the CLAUDE.md rule-1 default (100/15) — this track is
@@ -10,46 +11,65 @@ const PAN_SPRING = { type: "spring", stiffness: 100, damping: 15 } as const;
  * lift and arrow-button press feedback. */
 const HOVER_SPRING = { type: "spring", stiffness: 300, damping: 26 } as const;
 
-const CARD_WIDTH = 320;
+const CARD_WIDTH = 300;
 const CARD_GAP = 24;
 const STEP = CARD_WIDTH + CARD_GAP;
 
+/** Unsplash-hosted photography, requested for end-to-end real data. This
+ * sandbox's network policy blocks images.unsplash.com (confirmed via a 403
+ * from the egress proxy — general web access is off by default here), so
+ * these specific photo IDs could not be curl-verified before commit. They
+ * are widely-used, high-confidence stable IDs, but Vercel's production
+ * runtime (unrestricted network) is what will actually resolve them —
+ * spot-check the deployed carousel and swap any that 404. */
 const DISHES = [
   {
     course: "01",
+    tag: "Smoke & brine",
     name: "Charred Octopus",
     description: "Smoked paprika, confit lemon, sea fennel.",
     price: "$28",
+    image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "02",
+    tag: "Raw intensity",
     name: "Wagyu Tartare",
     description: "Burnt onion, quail yolk, rye crisp.",
     price: "$34",
+    image: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "03",
+    tag: "Earth & citrus",
     name: "Heirloom Beet",
     description: "Whipped goat curd, pistachio, blood orange.",
     price: "$22",
+    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "04",
+    tag: "Umami depth",
     name: "Black Cod",
     description: "Miso glaze, shiso, charred scallion.",
     price: "$46",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "05",
+    tag: "Bittersweet",
     name: "Duck Breast",
     description: "Cherry gastrique, celeriac, juniper.",
     price: "$42",
+    image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=800&q=80",
   },
   {
     course: "06",
+    tag: "Quiet indulgence",
     name: "Dark Chocolate",
     description: "Olive oil, sea salt, brioche crumb.",
     price: "$18",
+    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
   },
 ] as const;
 
@@ -109,25 +129,42 @@ function DishCard({
         y: { ...entrance, delay: index * 0.06 },
         scale: prefersReducedMotion ? { duration: 0 } : HOVER_SPRING,
       }}
-      className="flex h-[380px] w-[320px] shrink-0 flex-col justify-between rounded-3xl border border-paper/10 bg-paper/[0.03] p-8 transition-colors duration-200 hover:border-paper/20 hover:bg-paper/[0.05]"
+      className="group relative h-[440px] w-[300px] shrink-0 overflow-hidden rounded-3xl border border-paper/10 transition-colors duration-200 hover:border-paper/25"
     >
-      <span className="font-sans text-xs tracking-[0.2em] text-paper/40">
-        {dish.course}
-      </span>
-      <div>
-        <h3 className="font-display text-2xl italic text-paper">
-          {dish.name}
-        </h3>
-        <p className="mt-3 font-sans text-sm leading-relaxed text-paper/60">
-          {dish.description}
-        </p>
-        <div className="mt-6 flex items-center justify-between border-t border-paper/10 pt-4">
-          <span className="font-sans text-xs uppercase tracking-[0.2em] text-paper/40">
-            Tasting menu
+      <Image
+        src={dish.image}
+        alt={`${dish.name} — ${dish.description}`}
+        fill
+        sizes="300px"
+        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+        priority={index === 0}
+      />
+      {/* Scrim so the overlaid text stays legible over the photo, per the
+       * Figma reference's photo-card composition. */}
+      <div className="absolute inset-0 bg-gradient-to-t from-ink from-15% via-ink/70 via-45% to-transparent to-80%" />
+
+      <div className="relative flex h-full flex-col justify-between p-7">
+        <span className="font-sans text-xs tracking-[0.2em] text-paper/40">
+          {dish.course}
+        </span>
+        <div>
+          <span className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-paper/50">
+            {dish.tag}
           </span>
-          <span className="font-sans text-sm text-paper/80">
-            {dish.price}
-          </span>
+          <h3 className="mt-2 font-display text-[2rem] italic leading-[1.05] tracking-tight text-paper">
+            {dish.name}
+          </h3>
+          <p className="mt-3 font-sans text-xs leading-relaxed text-paper/60">
+            {dish.description}
+          </p>
+          <div className="mt-5 flex items-center justify-between border-t border-paper/15 pt-4">
+            <span className="font-sans text-xs uppercase tracking-[0.2em] text-paper/40">
+              Tasting menu
+            </span>
+            <span className="font-sans text-sm text-paper/80">
+              {dish.price}
+            </span>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -163,7 +200,7 @@ export function MenuCarousel() {
   }
 
   return (
-    <section className="relative bg-ink px-6 pb-32 pt-8 text-paper">
+    <section id="menu" className="relative scroll-mt-24 bg-ink px-6 pb-32 pt-8 text-paper">
       <div className="mx-auto max-w-5xl">
         <div className="flex items-end justify-between gap-6">
           <div>
@@ -220,6 +257,23 @@ export function MenuCarousel() {
           <ArrowButton direction="right" onClick={() => pan(1)} />
         </div>
       </div>
+
+      {/* Decorative flourish beneath the strip, echoing the flowing vector
+       * under the Figma reference's card row. */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 1200 160"
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-32 w-full opacity-40"
+      >
+        <path
+          d="M0 40 C 200 120, 400 0, 600 60 S 1000 140, 1200 40"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+          className="text-paper/20"
+        />
+      </svg>
     </section>
   );
 }

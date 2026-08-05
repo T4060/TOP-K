@@ -66,6 +66,7 @@ function FeatureCard({
 
   return (
     <motion.div
+      id={feature.title.toLowerCase()}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
@@ -76,7 +77,7 @@ function FeatureCard({
         scale: hover,
       }}
       className={cn(
-        "group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-paper/10 bg-paper/[0.03] p-8 transition-colors duration-200 hover:border-paper/20 hover:bg-paper/[0.05]",
+        "group relative flex scroll-mt-24 flex-col justify-between overflow-hidden rounded-3xl border border-paper/10 bg-paper/[0.03] p-8 transition-colors duration-200 hover:border-paper/20 hover:bg-paper/[0.05]",
         feature.span
       )}
     >
