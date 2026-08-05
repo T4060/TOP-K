@@ -3,7 +3,9 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { MagneticButton } from "@/components/magnetic-button";
 
-const SPRING = { type: "spring", stiffness: 100, damping: 15 } as const;
+/** High-velocity default, per explicit direction: replaces rule 1's
+ * standard 100/15 panel tier with a crisper spring site-wide. */
+const SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
 
 export function AboutContent() {
   const prefersReducedMotion = useReducedMotion();
@@ -25,7 +27,7 @@ export function AboutContent() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...transition, delay: prefersReducedMotion ? 0 : 0.08 }}
-          className="mt-6 font-display text-5xl italic leading-[1.1] tracking-tight text-ink sm:text-6xl"
+          className="mt-6 font-display text-6xl italic leading-[0.98] tracking-tighter text-ink sm:text-7xl"
         >
           A table, considered.
         </motion.h1>

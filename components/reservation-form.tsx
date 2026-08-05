@@ -10,7 +10,9 @@ import {
   type ReservationInput,
 } from "@/lib/reservations";
 
-const ENTRANCE_SPRING = { type: "spring", stiffness: 100, damping: 15 } as const;
+/** High-velocity default, per explicit direction: replaces rule 1's
+ * standard 100/15 panel tier with a crisper spring site-wide. */
+const ENTRANCE_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
 const PRESS_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
 
 const EMPTY_FORM: ReservationInput = {

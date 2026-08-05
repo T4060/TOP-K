@@ -4,12 +4,9 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-/**
- * Dropdown panel is a "larger surface" per CLAUDE.md rule 1, so it stays
- * on the default spring (100/15) rather than the stiffer tuning used for
- * small tracked elements like the magnetic button.
- */
-const DEFAULT_SPRING = { type: "spring", stiffness: 100, damping: 15 } as const;
+/** High-velocity default, per explicit direction: replaces rule 1's
+ * standard 100/15 panel tier with a crisper spring site-wide. */
+const DEFAULT_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
 
 export function Menu({
   setActive,

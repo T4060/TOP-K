@@ -10,9 +10,10 @@ import {
   useSpring,
 } from "framer-motion";
 
-/** Panel-level pan: the CLAUDE.md rule-1 default (100/15) — this track is
- * a large surface, so it stays weighted rather than snappy. */
-const PAN_SPRING = { type: "spring", stiffness: 100, damping: 15 } as const;
+/** High-velocity default, per explicit direction: replaces rule 1's
+ * standard 100/15 panel tier with a crisper spring site-wide, including
+ * this track's drag-release pan. */
+const PAN_SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
 /** Small-element tier from rule 1's tuning note, reused for card hover
  * lift and arrow-button press feedback. */
 const HOVER_SPRING = { type: "spring", stiffness: 300, damping: 26 } as const;
@@ -262,7 +263,7 @@ export function MenuCarousel() {
                 ...(prefersReducedMotion ? { duration: 0 } : PAN_SPRING),
                 delay: prefersReducedMotion ? 0 : 0.08,
               }}
-              className="mt-4 max-w-xl font-display text-4xl italic leading-[1.1] tracking-tight sm:text-5xl"
+              className="mt-4 max-w-xl font-display text-5xl italic leading-[1.02] tracking-tighter sm:text-6xl"
             >
               A menu, considered.
             </motion.h2>
