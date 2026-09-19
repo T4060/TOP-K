@@ -1,103 +1,60 @@
 "use client";
 
-import { useRef } from "react";
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
-import { MagneticButton } from "@/components/magnetic-button";
+import { motion, useReducedMotion, type Transition } from "framer-motion";
+import { Mascot } from "@/components/devhelp/mascot";
+import { DuoButton } from "@/components/devhelp/duo-button";
 
-/** Matches the site-wide crisp spring tier used across TOP-K's shared
- * primitives (rule 1), reused here for cross-product motion consistency. */
-const SPRING = { type: "spring", stiffness: 220, damping: 20 } as const;
+const ENTRANCE: Transition = { type: "spring", stiffness: 220, damping: 20 };
 
 export function DevHero() {
   const prefersReducedMotion = useReducedMotion();
-  const transition = prefersReducedMotion ? { duration: 0 } : SPRING;
-  const sectionRef = useRef<HTMLElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
-  const rawGridY = useTransform(scrollYProgress, [0, 1], [0, 140]);
-  const gridY = useSpring(rawGridY, { stiffness: 60, damping: 20 });
-  const rawContentOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const contentOpacity = useSpring(rawContentOpacity, {
-    stiffness: 60,
-    damping: 20,
-  });
+  const transition = prefersReducedMotion ? { duration: 0 } : ENTRANCE;
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-paper"
-    >
-      <motion.div
-        style={prefersReducedMotion ? undefined : { y: gridY }}
-        className="absolute inset-0 z-0"
-      >
-        <FlickeringGrid
-          className="h-full w-full [mask-image:radial-gradient(80%_60%_at_50%_40%,white,transparent)]"
-          color="#0a0a0a"
-          maxOpacity={0.18}
-          flickerChance={0.12}
-          squareSize={3}
-          gridGap={6}
-        />
-      </motion.div>
-
-      <motion.div
-        style={prefersReducedMotion ? undefined : { opacity: contentOpacity }}
-        className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 text-center"
-      >
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+    <section className="relative overflow-hidden bg-white px-6 pb-16 pt-14 sm:pb-24 sm:pt-20">
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 -z-0 h-64 bg-[radial-gradient(60%_60%_at_50%_0%,#DDF4C8,transparent)]"
+      />
+      <div className="relative mx-auto flex max-w-3xl flex-col items-center text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={transition}
-          className="font-sans text-xs font-medium uppercase tracking-[0.2em] text-ink/60"
         >
-          A learning tool for new programmers
-        </motion.p>
+          <Mascot size={140} />
+        </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...transition, delay: prefersReducedMotion ? 0 : 0.08 }}
-          className="mt-6 font-display text-6xl italic leading-[0.95] tracking-tighter text-ink sm:text-7xl md:text-8xl"
+          transition={{ ...transition, delay: prefersReducedMotion ? 0 : 0.1 }}
+          className="mt-6 font-duo-display text-4xl font-extrabold leading-tight tracking-tight text-duo-ink sm:text-5xl md:text-6xl"
         >
-          Type it. We&apos;ll walk you there.
+          Learn to code, <span className="text-duo-green">one command</span> at a time.
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...transition, delay: prefersReducedMotion ? 0 : 0.16 }}
-          className="mt-6 max-w-xl font-sans text-lg leading-relaxed text-ink/70"
+          transition={{ ...transition, delay: prefersReducedMotion ? 0 : 0.18 }}
+          className="mt-4 max-w-lg font-duo-body text-base font-semibold text-duo-ink/60 sm:text-lg"
         >
-          Say &ldquo;help me with this&rdquo; and describe what you&apos;re
-          stuck on. cmdline turns it into exact, numbered commands — run
-          straight in your terminal, no guessing which line does what.
+          A gamified path through the terminal skills every beginner needs —
+          real commands, one bite-sized lesson at a time.
         </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...transition, delay: prefersReducedMotion ? 0 : 0.24 }}
-          className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
+          transition={{ ...transition, delay: prefersReducedMotion ? 0 : 0.26 }}
+          className="mt-8"
         >
-          <MagneticButton href="/learn/terminal">
-            Help me with this...
-          </MagneticButton>
-          <span className="font-mono text-xs text-ink/40">
-            no install &middot; no account &middot; just answers
-          </span>
+          <DuoButton href="/learn/terminal" color="green" size="lg" magnetic>
+            Start learning
+          </DuoButton>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }

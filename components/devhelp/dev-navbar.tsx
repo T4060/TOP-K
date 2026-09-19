@@ -1,47 +1,50 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Menu, MenuItem, HoveredLink } from "@/components/ui/navbar-menu";
-import { MagneticButton } from "@/components/magnetic-button";
+import { DuoButton } from "@/components/devhelp/duo-button";
+import { StreakBadge } from "@/components/devhelp/streak-badge";
+import { XPBadge } from "@/components/devhelp/xp-badge";
+import { useDuoProgress } from "@/lib/duo-progress";
 
 export function DevNavbar() {
-  const [active, setActive] = useState<string | null>(null);
+  const { progress, hydrated } = useDuoProgress();
 
   return (
-    <header className="fixed inset-x-0 top-6 z-50 flex justify-center px-6">
-      <div className="flex w-full max-w-5xl items-center justify-between gap-6">
-        <Link href="/learn" className="font-display text-xl italic text-ink">
-          cmdline<span className="text-ink/40">/</span>
+    <header className="sticky top-0 z-50 border-b-2 border-duo-track bg-white/95 backdrop-blur">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
+        <Link
+          href="/learn"
+          className="font-duo-display text-2xl font-extrabold text-duo-green"
+        >
+          cmdline
         </Link>
 
-        <Menu setActive={setActive} className="hidden md:flex">
-          <MenuItem setActive={setActive} active={active} item="Topics">
-            <div className="flex flex-col gap-3">
-              <HoveredLink href="/learn#setup">Environment setup</HoveredLink>
-              <HoveredLink href="/learn#git">Git &amp; GitHub</HoveredLink>
-              <HoveredLink href="/learn#debug">Debugging</HoveredLink>
-              <HoveredLink href="/learn#ship">Shipping</HoveredLink>
-            </div>
-          </MenuItem>
-          <MenuItem setActive={setActive} active={active} item="How it works">
-            <div className="flex flex-col gap-3">
-              <HoveredLink href="/learn#how-it-works">Ask the terminal</HoveredLink>
-              <HoveredLink href="/learn/terminal">Open the tool</HoveredLink>
-            </div>
-          </MenuItem>
+        <nav className="hidden items-center gap-6 md:flex">
           <Link
-            href="/learn/terminal"
-            className="font-sans text-sm text-ink/80 transition-colors duration-200 hover:text-ink"
+            href="/learn"
+            className="font-duo-body text-sm font-bold text-duo-ink/60 transition-colors duration-200 hover:text-duo-ink"
           >
-            Terminal
+            Path
           </Link>
-        </Menu>
+          <Link
+            href="/learn#how-it-works"
+            className="font-duo-body text-sm font-bold text-duo-ink/60 transition-colors duration-200 hover:text-duo-ink"
+          >
+            How it works
+          </Link>
+        </nav>
 
-        <MagneticButton href="/learn/terminal" size="sm" className="shrink-0">
-          <span className="hidden sm:inline">Help me with this...</span>
-          <span className="sm:hidden">Help me</span>
-        </MagneticButton>
+        <div className="flex items-center gap-3">
+          {hydrated && progress.streak > 0 && <StreakBadge streak={progress.streak} />}
+          {hydrated && progress.xp > 0 && (
+            <div className="hidden sm:block">
+              <XPBadge xp={progress.xp} />
+            </div>
+          )}
+          <DuoButton href="/learn/terminal" color="green" size="sm" magnetic>
+            Continue
+          </DuoButton>
+        </div>
       </div>
     </header>
   );

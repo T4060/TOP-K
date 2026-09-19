@@ -15,28 +15,21 @@ export function DevFooter() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.6 }}
       transition={transition}
-      className="border-t border-ink/10 bg-paper px-6 py-12"
+      className="border-t-2 border-duo-track bg-white px-6 py-10"
     >
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
-        <div>
-          <p className="font-display text-lg italic text-ink">
-            cmdline<span className="text-ink/40">/</span>
-          </p>
-          <p className="mt-1 font-sans text-sm text-ink/50">
-            Built for the first hundred hours of learning to code.
-          </p>
-        </div>
-        <div className="flex items-center gap-6 font-sans text-sm text-ink/60">
-          <Link href="/learn" className="transition-colors duration-200 hover:text-ink">
-            Home
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+        <p className="font-duo-display text-lg font-extrabold text-duo-green">cmdline</p>
+        <div className="flex items-center gap-6 font-duo-body text-sm font-bold text-duo-ink/50">
+          <Link href="/learn" className="transition-colors duration-200 hover:text-duo-ink">
+            Path
           </Link>
           <Link
             href="/learn/terminal"
-            className="transition-colors duration-200 hover:text-ink"
+            className="transition-colors duration-200 hover:text-duo-ink"
           >
-            Terminal
+            Lesson
           </Link>
-          <Link href="/" className="transition-colors duration-200 hover:text-ink">
+          <Link href="/" className="transition-colors duration-200 hover:text-duo-ink">
             TOP-K ↗
           </Link>
         </div>
