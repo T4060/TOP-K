@@ -2,7 +2,6 @@
 
 import { useDuoProgress } from "@/lib/duo-progress";
 import { PathNode } from "@/components/devhelp/path-node";
-import { Mascot } from "@/components/devhelp/mascot";
 
 const GAP = 150;
 /** Fixed px offsets — well within even the narrowest phone widths (max
@@ -33,7 +32,7 @@ export function PathMap() {
     return { ...topic, status, x: OFFSETS[index] ?? 0, y: index * GAP + 60 };
   });
 
-  const mapHeight = (PATH_TOPICS.length - 1) * GAP + 160;
+  const mapHeight = (PATH_TOPICS.length - 1) * GAP + 100;
 
   return (
     <div className="relative mx-auto" style={{ maxWidth: 400, height: mapHeight }}>
@@ -64,13 +63,6 @@ export function PathMap() {
           status={hydrated ? node.status : index === 0 ? "current" : "locked"}
         />
       ))}
-
-      <div
-        className="absolute -translate-x-1/2"
-        style={{ left: `calc(50% + ${OFFSETS[PATH_TOPICS.length - 1]}px)`, top: mapHeight - 4 }}
-      >
-        <Mascot size={90} />
-      </div>
     </div>
   );
 }

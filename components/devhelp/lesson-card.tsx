@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion, type Transition } from "framer-motion";
 import { DuoButton } from "@/components/devhelp/duo-button";
-import { Mascot } from "@/components/devhelp/mascot";
 import { CopyButton } from "@/components/devhelp/copy-button";
 import { ConfettiBurst } from "@/components/devhelp/confetti-burst";
 import { XPBadge } from "@/components/devhelp/xp-badge";
@@ -86,7 +85,9 @@ export function LessonCard({ scenario }: { scenario: TerminalScenario }) {
             className="relative flex flex-col items-center py-4 text-center"
           >
             <ConfettiBurst />
-            <Mascot size={140} mood="celebrate" />
+            <span className="text-6xl" aria-hidden="true">
+              🎉
+            </span>
             <h2 className="mt-4 font-duo-display text-3xl font-extrabold text-duo-ink">
               Lesson complete!
             </h2>
@@ -117,16 +118,13 @@ export function LessonCard({ scenario }: { scenario: TerminalScenario }) {
             exit={{ opacity: 0, x: prefersReducedMotion ? 0 : -24 }}
             transition={ENTRANCE}
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-duo-display text-xs font-extrabold uppercase tracking-wide text-duo-blue">
-                  Step {stepIndex + 1} of {totalSteps}
-                </p>
-                <h2 className="mt-2 font-duo-display text-2xl font-extrabold leading-snug text-duo-ink sm:text-3xl">
-                  {step.explain}
-                </h2>
-              </div>
-              <Mascot size={72} />
+            <div>
+              <p className="font-duo-display text-xs font-extrabold uppercase tracking-wide text-duo-blue">
+                Step {stepIndex + 1} of {totalSteps}
+              </p>
+              <h2 className="mt-2 font-duo-display text-2xl font-extrabold leading-snug text-duo-ink sm:text-3xl">
+                {step.explain}
+              </h2>
             </div>
 
             {step.command && (
