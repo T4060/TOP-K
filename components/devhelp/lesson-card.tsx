@@ -9,10 +9,24 @@ import { ConfettiBurst } from "@/components/devhelp/confetti-burst";
 import { XPBadge } from "@/components/devhelp/xp-badge";
 import { StreakBadge } from "@/components/devhelp/streak-badge";
 import { useDuoProgress } from "@/lib/duo-progress";
-import type { TerminalScenario } from "@/lib/terminal-scenarios";
+import type { ScenarioLevel, TerminalScenario } from "@/lib/terminal-scenarios";
 
 const ENTRANCE: Transition = { type: "spring", stiffness: 260, damping: 24 };
 const BAR_SPRING: Transition = { type: "spring", stiffness: 200, damping: 28 };
+
+/** Harder lessons pay out more — makes the difficulty ramp legible, not
+ * just longer. */
+const XP_BY_LEVEL: Record<ScenarioLevel, number> = {
+  beginner: 10,
+  intermediate: 15,
+  advanced: 25,
+};
+
+const LEVEL_PILL: Record<ScenarioLevel, string> = {
+  beginner: "bg-duo-green/20 text-duo-green",
+  intermediate: "bg-duo-blue text-duo-ink",
+  advanced: "bg-duo-red text-duo-ink",
+};
 
 function CloseIcon() {
   return (
@@ -34,17 +48,32 @@ export function LessonCard({ scenario }: { scenario: TerminalScenario }) {
   }, [scenario.id]);
 
   const totalSteps = scenario.steps.length;
-  const isLastStep = stepIndex === totalSteps - 1;
-  const step = scenario.steps[stepIndex]!;
+  const isLastStep = stepIndex >= totalSteps - 1;
+  const xpAward = XP_BY_LEVEL[scenario.level];
+
+  /**
+   * `stepIndex` is clamped here rather than trusted as always in-bounds:
+   * a fast repeat-click on Continue/Finish (a real DuoButton whileTap +
+   * click race, reproduced under Playwright and not just a test
+   * artifact — confirmed against a production build) can advance
+   * `stepIndex` past the last step in the same tick `isLastStep` was
+   * still read as true by a prior click's closure. The effect below is
+   * the single place that decides "finished"; clamping here just keeps
+   * every render safe in the meantime instead of reading
+   * `undefined.explain`.
+   */
+  const step = scenario.steps[Math.min(stepIndex, totalSteps - 1)]!;
   const progressRatio = (stepIndex + (finished ? 1 : 0)) / totalSteps;
 
-  function handleContinue() {
-    if (isLastStep) {
-      markComplete(scenario.id);
+  useEffect(() => {
+    if (stepIndex >= totalSteps && !finished) {
+      markComplete(scenario.id, xpAward);
       setFinished(true);
-    } else {
-      setStepIndex((i) => i + 1);
     }
+  }, [stepIndex, totalSteps, finished, scenario.id, xpAward, markComplete]);
+
+  function handleContinue() {
+    setStepIndex((i) => (i >= totalSteps - 1 ? totalSteps : i + 1));
   }
 
   function handlePracticeAgain() {
@@ -53,7 +82,7 @@ export function LessonCard({ scenario }: { scenario: TerminalScenario }) {
   }
 
   return (
-    <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl border-2 border-duo-track bg-white p-6 shadow-[0_4px_0_#E5E5E5] sm:p-8">
+    <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl border border-duo-track bg-duo-surface p-6 shadow-[0_4px_0_rgba(0,0,0,0.4)] sm:p-8">
       {!finished && (
         <div className="mb-8 flex items-center gap-4">
           <Link
@@ -85,15 +114,29 @@ export function LessonCard({ scenario }: { scenario: TerminalScenario }) {
             className="relative flex flex-col items-center py-4 text-center"
           >
             <ConfettiBurst />
-            <span className="text-6xl" aria-hidden="true">
-              🎉
+            <span
+              aria-hidden="true"
+              className="flex h-16 w-16 items-center justify-center rounded-full border border-duo-gold/40 bg-duo-gold/10"
+            >
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M4 13l5 6L20 6"
+                  stroke="#E4C275"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </span>
-            <h2 className="mt-4 font-duo-display text-3xl font-extrabold text-duo-ink">
-              Lesson complete!
+            <h2 className="mt-4 font-duo-display text-3xl italic text-duo-ink">
+              Lesson complete.
             </h2>
-            <p className="mt-2 max-w-sm font-duo-body text-sm font-medium text-duo-ink/60">
+            <p className="mt-2 max-w-sm font-duo-body text-sm text-duo-ink/55">
               {scenario.label} is done. Those commands are real — you just ran the exact
               playbook a working dev would.
+            </p>
+            <p className="mt-1 font-duo-body text-sm font-semibold text-duo-gold">
+              +{xpAward} XP
             </p>
 
             <div className="mt-6 flex items-center gap-3">
@@ -118,18 +161,23 @@ export function LessonCard({ scenario }: { scenario: TerminalScenario }) {
             exit={{ opacity: 0, x: prefersReducedMotion ? 0 : -24 }}
             transition={ENTRANCE}
           >
-            <div>
-              <p className="font-duo-display text-xs font-extrabold uppercase tracking-wide text-duo-blue">
+            <div className="flex items-center gap-3">
+              <p className="font-duo-body text-xs font-medium uppercase tracking-[0.15em] text-duo-green">
                 Step {stepIndex + 1} of {totalSteps}
               </p>
-              <h2 className="mt-2 font-duo-display text-2xl font-extrabold leading-snug text-duo-ink sm:text-3xl">
-                {step.explain}
-              </h2>
+              <span
+                className={`rounded-full px-2.5 py-0.5 font-duo-body text-[10px] font-semibold uppercase tracking-wide ${LEVEL_PILL[scenario.level]}`}
+              >
+                {scenario.level}
+              </span>
             </div>
+            <h2 className="mt-3 font-duo-display text-2xl italic leading-snug text-duo-ink sm:text-3xl">
+              {step.explain}
+            </h2>
 
             {step.command && (
-              <div className="mt-6 flex items-center gap-3 rounded-2xl bg-duo-ink px-4 py-4">
-                <code className="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-[13px] text-duo-green">
+              <div className="mt-6 flex items-center gap-3 rounded-2xl border border-duo-track bg-black/40 px-4 py-4">
+                <code className="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-[13px] text-duo-gold">
                   {step.command}
                 </code>
                 <CopyButton command={step.command} />
@@ -137,7 +185,7 @@ export function LessonCard({ scenario }: { scenario: TerminalScenario }) {
             )}
 
             {step.note && (
-              <p className="mt-4 rounded-xl bg-duo-blue/10 px-4 py-3 font-duo-body text-sm font-semibold text-duo-blue-dark">
+              <p className="mt-4 border-l-2 border-duo-gold/50 py-1 pl-4 font-duo-body text-sm text-duo-ink/60">
                 {step.note}
               </p>
             )}

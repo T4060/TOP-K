@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
-const COLORS = ["#58CC02", "#1CB0F6", "#FFC800", "#FF4B4B", "#CE82FF"];
+const COLORS = ["#C9A24B", "#E4C275", "#1F5C48", "#7A3B3B", "#F1EAD9"];
 
 export function ConfettiBurst({ count = 28 }: { count?: number }) {
   const prefersReducedMotion = useReducedMotion();

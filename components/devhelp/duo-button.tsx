@@ -11,10 +11,10 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Duolingo's signature "chunky" button: a bright face sitting a few
- * pixels above a darker shadow layer, so a press reads as the face
- * sinking into its own shadow. The only animated property is the face's
- * `y` transform (rule 3) — the shadow itself never moves or resizes.
+ * A tactile "pressed" button: a face sitting a few pixels above a
+ * darker shadow layer, so a press reads as the face sinking into its
+ * own shadow. The only animated property is the face's `y` transform
+ * (rule 3) — the shadow itself never moves or resizes.
  * Primary CTAs (`magnetic`) also get rule 2's cursor-follow behavior on
  * the outer wrapper, composing independently with the press transform
  * on the inner face.
@@ -24,14 +24,15 @@ const HOVER_SPRING = { type: "spring", stiffness: 400, damping: 24 } as const;
 const MAGNET_SPRING = { type: "spring", stiffness: 300, damping: 20 } as const;
 
 const COLOR_STYLES = {
-  green: { face: "bg-duo-green", shadow: "bg-duo-green-dark", text: "text-white" },
-  blue: { face: "bg-duo-blue", shadow: "bg-duo-blue-dark", text: "text-white" },
-  gold: { face: "bg-duo-gold", shadow: "bg-duo-gold-dark", text: "text-duo-ink" },
-  red: { face: "bg-duo-red", shadow: "bg-duo-red-dark", text: "text-white" },
-  purple: { face: "bg-duo-purple", shadow: "bg-duo-purple-dark", text: "text-white" },
+  green: { face: "bg-duo-green", shadow: "bg-duo-green-dark", text: "text-duo-bg" },
+  blue: { face: "bg-duo-blue", shadow: "bg-duo-blue-dark", text: "text-duo-ink" },
+  gold: { face: "bg-duo-gold", shadow: "bg-duo-gold-dark", text: "text-duo-bg" },
+  red: { face: "bg-duo-red", shadow: "bg-duo-red-dark", text: "text-duo-ink" },
+  purple: { face: "bg-duo-purple", shadow: "bg-duo-purple-dark", text: "text-duo-ink" },
+  /** Secondary/outline variant — a quiet surface, not literal white. */
   white: {
-    face: "border-2 border-duo-track bg-white",
-    shadow: "bg-duo-track",
+    face: "border border-duo-track bg-duo-surface",
+    shadow: "bg-black/40",
     text: "text-duo-ink",
   },
 } as const;
@@ -119,7 +120,7 @@ export function DuoButton({
             : { y: depth, transition: PRESS_SPRING }
         }
         className={cn(
-          "relative z-10 block select-none rounded-2xl text-center font-duo-display font-bold tracking-wide",
+          "relative z-10 block select-none rounded-2xl text-center font-duo-body font-medium tracking-wide",
           face,
           text,
           pad,

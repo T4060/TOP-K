@@ -15,11 +15,11 @@ export function DevFooter() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.6 }}
       transition={transition}
-      className="border-t-2 border-duo-track bg-white px-6 py-10"
+      className="border-t border-duo-track bg-duo-bg px-6 py-10"
     >
       <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-        <p className="font-duo-display text-lg font-extrabold text-duo-green">cmdline</p>
-        <div className="flex items-center gap-6 font-duo-body text-sm font-bold text-duo-ink/50">
+        <p className="font-duo-display text-lg italic text-duo-green">cmdline</p>
+        <div className="flex items-center gap-6 font-duo-body text-sm text-duo-ink/45">
           <Link href="/learn" className="transition-colors duration-200 hover:text-duo-ink">
             Path
           </Link>

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "One step at a time — real terminal commands, gamified.",
 };
 
-const DEFAULT_TOPIC_ID = "install-node";
+const DEFAULT_TOPIC_ID = "shell-basics";
 
 function resolveScenario(ask?: string) {
   if (!ask) {
@@ -28,7 +28,7 @@ export default function TerminalPage({
   return (
     <main>
       <DevNavbar />
-      <section className="flex min-h-[calc(100vh-64px)] w-full flex-col items-center justify-center bg-[#F7F7F5] px-4 py-12 sm:px-6">
+      <section className="flex min-h-[calc(100vh-64px)] w-full flex-col items-center justify-center bg-duo-surface px-4 py-12 sm:px-6">
         <LessonCard scenario={scenario} />
       </section>
       <DevFooter />

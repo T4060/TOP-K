@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 const STORAGE_KEY = "cmdline-progress";
-const XP_PER_LESSON = 10;
+const DEFAULT_XP = 10;
 
 export type DuoProgress = {
   completed: string[];
@@ -73,13 +73,13 @@ export function useDuoProgress() {
     setHydrated(true);
   }, []);
 
-  const markComplete = useCallback((id: string) => {
+  const markComplete = useCallback((id: string, xpAward: number = DEFAULT_XP) => {
     setProgress((prev) => {
       if (prev.completed.includes(id)) return prev;
       const next = {
         ...prev,
         completed: [...prev.completed, id],
-        xp: prev.xp + XP_PER_LESSON,
+        xp: prev.xp + xpAward,
       };
       writeRaw(next);
       return next;
@@ -91,5 +91,5 @@ export function useDuoProgress() {
     [progress.completed]
   );
 
-  return { progress, hydrated, markComplete, isComplete, xpPerLesson: XP_PER_LESSON };
+  return { progress, hydrated, markComplete, isComplete };
 }

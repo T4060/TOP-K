@@ -7,11 +7,11 @@ const POP_SPRING = { type: "spring", stiffness: 400, damping: 15 } as const;
 
 function FlameIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
       <path
         d="M12 2c1 3-3 4-3 8a3 3 0 006 0c1 1 2 2.5 2 4.5A5.5 5.5 0 0111.5 20 6 6 0 015 14c0-5 4-7 4-10 1 1 2 2 3-2z"
-        fill="#FF9600"
-        stroke="#E6790A"
+        fill="#C9A24B"
+        stroke="#A17F38"
         strokeWidth="0.5"
         strokeLinejoin="round"
       />
@@ -28,10 +28,10 @@ export function StreakBadge({ streak }: { streak: number }) {
       initial={prefersReducedMotion ? undefined : { scale: 1.3 }}
       animate={{ scale: 1 }}
       transition={POP_SPRING}
-      className="flex items-center gap-1.5 rounded-full border-2 border-duo-track bg-white px-3 py-1.5"
+      className="flex items-center gap-1.5 rounded-full border border-duo-track bg-duo-surface px-3 py-1.5"
     >
       <FlameIcon />
-      <span className="font-duo-display text-sm font-extrabold text-duo-ink">
+      <span className="font-duo-body text-sm font-semibold text-duo-ink">
         <AnimatedNumber value={streak} />
       </span>
     </motion.div>

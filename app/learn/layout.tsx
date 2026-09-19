@@ -1,26 +1,27 @@
-import { Baloo_2, Nunito } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 
 /**
- * CLAUDE.md rule-4 exception: the site-wide rule pairs a serif display
- * face with a neutral sans for body copy. cmdline was explicitly
- * commissioned as a Duolingo-style redesign — bold, rounded, all-sans is
- * the entire visual identity there; a serif headline would fight the
- * brand rather than express it. We keep the *spirit* of rule 4 (exactly
- * two type families, one for display, one for body/UI) and swap which
- * two: Baloo 2 (chunky rounded display) + Nunito (rounded body/UI sans),
- * both scoped to this route group only — TOP-K's Fraunces/Inter pairing
- * is untouched everywhere else in the app.
+ * cmdline was rebuilt as a premium, dark, jewel-toned product — no
+ * longer the Duolingo-style bright/rounded identity, so the earlier
+ * rule-4 exception (Baloo 2 + Nunito in place of the site's serif/sans
+ * pairing) no longer applies: this now uses the same Fraunces italic
+ * display + Inter body pairing as the rest of TOP-K, matching rule 4
+ * directly rather than deviating from it. Loaded separately from the
+ * root layout's copies (different weights/styles needed here) but into
+ * the same --font-duo-* CSS vars the /learn components already read, so
+ * no component classNames needed touching for the swap.
  */
-const duoDisplay = Baloo_2({
+const duoDisplay = Fraunces({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
   variable: "--font-duo-display",
   display: "swap",
 });
 
-const duoBody = Nunito({
+const duoBody = Inter({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["400", "500", "600"],
   variable: "--font-duo-body",
   display: "swap",
 });

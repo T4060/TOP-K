@@ -10,10 +10,10 @@ const PULSE: Transition = { type: "spring", stiffness: 120, damping: 6 };
 function LockIcon() {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-      <rect x="5" y="10" width="14" height="10" rx="2.5" fill="#AFAFAF" />
+      <rect x="5" y="10" width="14" height="10" rx="2.5" fill="#6B6558" />
       <path
         d="M8 10V7a4 4 0 018 0v3"
-        stroke="#AFAFAF"
+        stroke="#6B6558"
         strokeWidth="2.2"
         strokeLinecap="round"
         fill="none"
@@ -24,11 +24,11 @@ function LockIcon() {
 
 function CheckBadge() {
   return (
-    <div className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-duo-gold">
+    <div className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-duo-bg bg-duo-gold">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path
           d="M2.5 7.5l3 3 6-6.5"
-          stroke="white"
+          stroke="#0B0B0C"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -55,6 +55,7 @@ export function PathNode({
   y,
   index,
   status,
+  capstone = false,
 }: {
   id: string;
   icon: string;
@@ -64,14 +65,16 @@ export function PathNode({
   y: number;
   index: number;
   status: "locked" | "current" | "complete";
+  capstone?: boolean;
 }) {
   const prefersReducedMotion = useReducedMotion();
+  const size = capstone ? "h-24 w-24 text-4xl" : "h-20 w-20 text-3xl";
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.5 }}
       whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, amount: 0.8 }}
+      viewport={{ once: true, amount: 0.3 }}
       transition={{ ...POP_SPRING, delay: prefersReducedMotion ? 0 : index * 0.1 }}
       className="absolute flex -translate-x-1/2 flex-col items-center"
       style={{ left: `calc(50% + ${x}px)`, top: y }}
@@ -81,9 +84,14 @@ export function PathNode({
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, ...POP_SPRING }}
-          className="mb-2 rounded-xl border-2 border-duo-track bg-white px-3 py-1 font-duo-display text-xs font-extrabold uppercase tracking-wide text-duo-green"
+          className={cn(
+            "mb-2 rounded-xl border px-3 py-1 font-duo-body text-xs font-medium uppercase tracking-wide",
+            capstone
+              ? "border-duo-gold-dark bg-duo-gold text-duo-bg"
+              : "border-duo-track bg-duo-surface text-duo-green"
+          )}
         >
-          Start
+          {capstone ? "Capstone" : "Start"}
         </motion.span>
       )}
 
@@ -95,7 +103,12 @@ export function PathNode({
         className="relative"
       >
         {status === "locked" ? (
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-duo-track bg-[#F0F0F0]">
+          <div
+            className={cn(
+              "flex items-center justify-center rounded-full border-4 border-duo-track bg-duo-surface",
+              size
+            )}
+          >
             <LockIcon />
           </div>
         ) : (
@@ -105,8 +118,10 @@ export function PathNode({
               whileTap={prefersReducedMotion ? undefined : { scale: 0.92 }}
               transition={POP_SPRING}
               className={cn(
-                "flex h-20 w-20 cursor-pointer items-center justify-center rounded-full border-4 text-3xl shadow-[0_5px_0_rgba(0,0,0,0.12)]",
-                COLOR_FACE[color]
+                "flex cursor-pointer items-center justify-center rounded-full border-4 shadow-[0_5px_0_rgba(0,0,0,0.12)]",
+                size,
+                COLOR_FACE[color],
+                capstone && "ring-4 ring-duo-gold/40"
               )}
             >
               {icon}

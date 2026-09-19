@@ -8,7 +8,7 @@ import { DevFooter } from "@/components/devhelp/dev-footer";
 export const metadata: Metadata = {
   title: "cmdline — learn to code, in your terminal",
   description:
-    "A gamified, Duolingo-style path through the terminal skills every beginner needs — real commands, one lesson at a time.",
+    "A premium, real-terminal path through the skills every beginner needs — real commands, one lesson at a time, ending in a website you actually ship.",
 };
 
 export default function LearnPage() {
@@ -16,8 +16,8 @@ export default function LearnPage() {
     <main>
       <DevNavbar />
       <DevHero />
-      <section className="bg-[#F7F7F5] px-6 py-20">
-        <p className="mb-12 text-center font-duo-display text-xs font-extrabold uppercase tracking-[0.2em] text-duo-ink/40">
+      <section className="bg-duo-surface px-6 py-20">
+        <p className="mb-12 text-center font-duo-body text-xs font-medium uppercase tracking-[0.25em] text-duo-ink/40">
           Your path
         </p>
         <PathMap />

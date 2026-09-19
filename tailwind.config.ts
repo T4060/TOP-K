@@ -16,23 +16,29 @@ const config: Config = {
       colors: {
         ink: "#0a0a0a",
         paper: "#fafaf9",
-        /** cmdline's Duolingo-style palette — scoped to the /learn product,
-         * kept separate from TOP-K's ink/paper two-tone (rule 4 exception,
-         * see app/learn/layout.tsx). */
+        /** cmdline's palette — scoped to the /learn product, kept separate
+         * from TOP-K's ink/paper two-tone. A dark, jewel-toned "quiet
+         * luxury" system: brass/gold as the primary accent, deep emerald
+         * and burgundy as secondary accents, on near-black surfaces —
+         * deliberately not the bright green-on-white gamification look
+         * competitors default to. Token *names* stay from the earlier
+         * pass (duo.green is the primary accent, etc.) so component
+         * classNames didn't need touching — only the values changed. */
         duo: {
-          green: "#58CC02",
-          "green-dark": "#46A302",
-          blue: "#1CB0F6",
-          "blue-dark": "#1899D6",
-          gold: "#FFC800",
-          "gold-dark": "#E6B400",
-          red: "#FF4B4B",
-          "red-dark": "#EA2B2B",
-          purple: "#CE82FF",
-          "purple-dark": "#A568CC",
-          ink: "#3C3C3C",
-          bg: "#FFFFFF",
-          track: "#E5E5E5",
+          green: "#C9A24B",
+          "green-dark": "#A17F38",
+          blue: "#1F5C48",
+          "blue-dark": "#123B2E",
+          gold: "#E4C275",
+          "gold-dark": "#B89347",
+          red: "#7A3B3B",
+          "red-dark": "#5A2929",
+          purple: "#4E3B63",
+          "purple-dark": "#382A48",
+          ink: "#F1EAD9",
+          bg: "#0B0B0C",
+          surface: "#161514",
+          track: "#2C2823",
         },
       },
       keyframes: {
